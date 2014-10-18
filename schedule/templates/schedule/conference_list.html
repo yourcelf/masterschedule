@@ -4,7 +4,7 @@
 {% block main %}
   <h1>Conferences</h1>
   <ul>
-    {% for conference in conferences %}
+    {% for conference in object_list %}
       <li><a href='{{ conference.get_absolute_url }}'>{{ conference }}</a></li>
     {% endfor %}
   </ul>

@@ -45,13 +45,27 @@ function cancelForm(event) {
   parent.find(".add-button").show();
   parent.find(".add-form").addClass("hide");
 }
+function updateEventAttribute(jqevt) {
+  jqevt.preventDefault();
+  var $el = $(jqevt.currentTarget);
+  var url = $el.attr("data-url");
+  var data = {
+    name: $el.attr("name"),
+    value: $el.val(),
+  };
+  $.post(url, data, function(data) {
+    updateRow($el.closest(".event-role-row"), data);
+  });
+}
 
 function registerHandlers(parent) {
   $("a.add-role", parent).click(showAddRoleForm);
   $("a.delete-role", parent).click(deleteRole);
   $("form.add-role", parent).submit(addRole);
   $("a.cancel-add-role", parent).click(cancelForm);
+  $("[data-action='update-event-attribute']", parent).change(updateEventAttribute);
 }
+
 
 function updateRow(selector, data) {
     var $data = $(data);

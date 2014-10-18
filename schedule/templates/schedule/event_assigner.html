@@ -4,12 +4,15 @@
 {% include "schedule/_conference_nav.html" %}
 <div class='container'>
   <h1>Events</h1>
-  <a class='btn btn-primary' href='{% url "admin:schedule_event_add" %}'>Add event</a>
+  {% if perms.schedule.add_event %}
+    <a class='btn btn-primary' href='{% url "admin:schedule_event_add" %}'>Add event</a>
+  {% endif %}
   <table class='ea table table-condensed'>
     <tr>
       <th>Date</th>
       <th>Title</th>
-      <th colspan='2'>Roles</th>
+      <th>Roles</th>
+      <th>Venue</th>
     </tr>
 
     {% for event in object_list %}

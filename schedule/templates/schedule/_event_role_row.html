@@ -18,11 +18,16 @@
             <table>
               <tr>
                 <td>
-                  <select name='role'>
-                    {% for role in role_types %}
-                      <option value='{{ role.pk }}'>{{ role }}</option>
-                    {% endfor %}
-                  </select><a href='{% url "admin:schedule_roletype_add" %}' title='Add role type' data-toggle='tooltip'><i class='glyphicon glyphicon-plus-sign'></i></a>
+                  <nobr>
+                    <select name='role'>
+                      {% for role in role_types %}
+                        <option value='{{ role.pk }}'>{{ role }}</option>
+                      {% endfor %}
+                    </select>
+                    {% if perms.schedule.add_roletype %}
+                      <a href='{% url "admin:schedule_roletype_add" %}' title='Add role type' data-toggle='tooltip'><i class='glyphicon glyphicon-plus-sign'></i></a>
+                    {% endif %}
+                  </nobr>
                 </td>
                 <td style='vertical-align: top;'>
                   <span class='person-holder'>Loading...</span>
@@ -54,5 +59,21 @@
       </tr>
     {% endfor %}
     </table>
+  </td>
+  <td class='venue'>
+    <nobr>
+      <select name='venue_id'
+          data-url='{% url "update_event_attribute" event.id %}'
+          data-action='update-event-attribute'>
+        <option value=''></option>
+        {% for venue in venues %}
+          <option value='{{ venue.pk }}'
+              {% if venue == event.venue %}selected="selected"{% endif %}>
+            {{ venue }}
+          </option>
+        {% endfor %}
+
+      </select>{% if perms.schedule.add_venue %}<a href='{% url "admin:schedule_venue_add" %}' title='Add venue' data-toggle='tooltip'><i class='glyphicon glyphicon-plus-sign'></i></a>{% endif %}
+    </nobr>
   </td>
 </tr>

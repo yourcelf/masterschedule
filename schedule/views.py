@@ -117,9 +117,15 @@ class EventAssigner(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(EventAssigner, self).get_context_data(**kwargs)
-        context['conference'] = self.conference
-        context['role_types'] = list(self.conference.roletype_set.all())
+        _add_event_context(context, self.conference)
         return context
+
+def _add_event_context(context, conference):
+    context['conference'] = conference
+    context['role_types'] = list(conference.roletype_set.all())
+    context["venues"] = list(conference.venue_set.all())
+    return context
+
 
 def add_event_role(request, pk):
     if request.method != 'POST':
@@ -138,11 +144,9 @@ def add_event_role(request, pk):
             person_id=person_id,
             role_id=request.POST.get("role"))[0]
     event.eventrole_set.add(role)
-    return render(request, "schedule/_event_role_row.html", {
-        "conference": event.conference,
-        "event": event,
-        "role_types": list(event.conference.roletype_set.all())
-    })
+    context = {"event": event}
+    _add_event_context(context, event.conference)
+    return render(request, "schedule/_event_role_row.html", context)
 
 def remove_event_role(request, pk):
     if request.method != 'POST':
@@ -150,11 +154,23 @@ def remove_event_role(request, pk):
     role = get_object_or_404(EventRole, pk=pk)
     event = role.event
     role.delete()
-    return render(request, "schedule/_event_role_row.html", {
-        "conference": event.conference,
-        "event": event,
-        "role_types": list(event.conference.roletype_set.all())
-    })
+    context = {"event": event}
+    _add_event_context(context, event.conference)
+    return render(request, "schedule/_event_role_row.html", context)
+
+def update_event_attribute(request, pk):
+    if request.method != "POST":
+        return HttpResponseBadRequest("POST required")
+    event = get_object_or_404(Event, pk=pk)
+    name = request.POST.get("name")
+    if name not in set(["venue_id"]):
+        return HttpResponseBadRequest("Name not allowed.")
+    setattr(event, request.POST.get("name"), request.POST.get("value") or None)
+    event.save()
+    context = {"event": event}
+    _add_event_context(context, event.conference)
+    return render(request, "schedule/_event_role_row.html", context)
+
 
 def get_available_people(request, pk):
     event = get_object_or_404(Event, pk=pk)
