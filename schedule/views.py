@@ -3,7 +3,7 @@ import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseBadRequest, Http404, HttpResponse
 from django.contrib import messages
-from vanilla import ListView, DetailView, UpdateView
+from vanilla import ListView, DetailView, UpdateView, CreateView
 
 from schedule.models import *
 from schedule.forms import *
@@ -98,16 +98,23 @@ class PersonalSchedule(MasterSchedule):
         context['filter'] = "Schedule for {}".format(unicode(self.person))
         return context
 
-class PersonList(ListView):
+class PersonList(CreateView):
     template_name = "schedule/person_list.html"
-    def get_queryset(self):
-        self.conference = get_object_or_404(Conference, pk=self.kwargs['pk'])
-        return Person.objects.filter(conference__id=self.kwargs['pk']).order_by('name')
+    form_class = PersonForm
 
     def get_context_data(self, **kwargs):
         context = super(PersonList, self).get_context_data(**kwargs)
-        context['conference'] = self.conference
+        context['conference'] = get_object_or_404(Conference, pk=self.kwargs['pk'])
+        context['object_list'] = context['conference'].person_set.all()
         return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+        person, created = Person.objects.get_or_create(
+            conference=context['conference'],
+            **form.cleaned_data
+        )
+        return redirect(self.request.path)
 
 class EventAssigner(ListView):
     template_name = "schedule/event_assigner.html"

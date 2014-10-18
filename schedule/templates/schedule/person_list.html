@@ -5,9 +5,12 @@
 {% block main %}
 <div class='container'>
   <h1>{{ conference }} People</h1>
-  {% if perms.schedule.add_person %}
-    <p><a class='btn btn-primary' href='{% url "admin:schedule_person_add" %}'>Add person</a></p>
-  {% endif %}
+  <p>
+    <form method='post' action=''>{% csrf_token %}
+      {{ form }}
+      <input class='btn btn-primary' type='submit' value='Add Person' />
+    </form>
+  </p>
   <ul>
     {% for person in object_list %}
       <li>
