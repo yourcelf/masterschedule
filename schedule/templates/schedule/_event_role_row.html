@@ -14,7 +14,8 @@
     <table class='roles'>
       <tr class='add-form hide'>
         <td colspan='3'>
-          <form class='add-role' action='{% url "add_event_role" event.pk %}'>
+          <form class='add-role' action='{% url "add_event_role" event.pk %}'>{% csrf_token %}
+            <input type='hidden' name='id' value=''>
             <table>
               <tr>
                 <td>
@@ -55,6 +56,12 @@
           {% if role.person %}
             <a href='{% url "personal_schedule" role.person.pk %}'>{{ role.person }}</a>
           {% endif %}
+          <a class='edit-role' href='#'
+              data-available-people-url='{% url "get_available_people" event.id %}'
+              data-role-id='{{ role.id }}'
+              data-roletype-id='{{ role.role.id }}'
+              data-person-id='{{ role.person.id }}'
+              data-person-name='{{ role.person|escapejs }}'><i class='glyphicon glyphicon-pencil'></i></a>
         </td>
       </tr>
     {% endfor %}

@@ -139,19 +139,29 @@ def _add_event_context(context, conference):
 def add_event_role(request, pk):
     if request.method != 'POST':
         return HttpResponseBadRequest("POST required")
-    try:
-        event = Event.objects.select_related('conference').get(pk=pk)
-    except Event.DoesNotExist:
-        raise Http404
+    event = get_object_or_404(Event.objects.select_related('conference'), pk=pk)
 
     person_id = request.POST.get("person")
-    if not person_id:
-        person_id = None
+    if person_id:
+        person = get_object_or_404(Person.objects.filter(conference=event.conference),
+                pk=person_id)
+    else:
+        person = None
 
-    role = EventRole.objects.get_or_create(
+    roletype = get_object_or_404(RoleType.objects.filter(conference=event.conference),
+            pk=request.POST.get("role"))
+
+    eventrole_id = request.POST.get("id")
+    if eventrole_id:
+        role = get_object_or_404(EventRole.objects.filter(event=event), pk=eventrole_id)
+        role.person = person
+        role.role = roletype
+        role.save()
+    else:
+        role = EventRole.objects.get_or_create(
             event=event,
-            person_id=person_id,
-            role_id=request.POST.get("role"))[0]
+            person=person,
+            role=roletype)[0]
     event.eventrole_set.add(role)
     context = {"event": event}
     _add_event_context(context, event.conference)

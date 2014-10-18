@@ -1,4 +1,4 @@
-function showAddRoleForm(event) {
+function showAddRoleForm(event, formdata) {
   event.preventDefault();
   var url = $(event.currentTarget).attr("data-available-people-url");
   var parent = $(event.currentTarget).closest("table.roles");
@@ -10,10 +10,24 @@ function showAddRoleForm(event) {
         select.append($("<option value='" + data[i].value + "'>" + data[i].name + "</option>"));
       }
       parent.find(".person-holder").replaceWith(select);
+      if (formdata && formdata.personId) {
+        select.val(formdata.personId);
+      }
     });
+  } else {
+      if (formdata && formdata.personId) {
+        $("[name=person]").val(formdata.personId);
+      }
   }
   parent.find(".add-button").hide();
   parent.find(".add-form").removeClass("hide");
+  if (formdata) {
+    parent.find("[name=role]").val(formdata.roleTypeId);
+    parent.find("[name=id]").val(formdata.id);
+    parent.find("[type=submit]").html("Update");
+  } else {
+    parent.find("[type=submit]").html("Add");
+  }
 }
 function deleteRole(event) {
   event.preventDefault();
@@ -21,6 +35,16 @@ function deleteRole(event) {
   $.post($(event.currentTarget).attr("href"), function(data) {
     updateRow($(event.currentTarget).closest(".event-role-row"), data);
   });
+}
+function editRole(event) {
+  event.preventDefault();
+  var $el = $(event.currentTarget);
+  var data = {
+    id: $el.attr("data-role-id"),
+    roleTypeId: $el.attr("data-roletype-id"),
+    personId: $el.attr("data-person-id")
+  };
+  showAddRoleForm(event, data);
 }
 function addRole(event) {
   var form = $(event.currentTarget);
@@ -30,6 +54,10 @@ function addRole(event) {
     person: form.find("[name=person]").val(),
     role: form.find("[name=role]").val()
   };
+  var id = form.find("[name=id]").val();
+  if (id) {
+    data.id = id;
+  }
   if (data.role == "") {
     alert("Please add a role.");
     return;
@@ -64,6 +92,7 @@ function registerHandlers(parent) {
   $("form.add-role", parent).submit(addRole);
   $("a.cancel-add-role", parent).click(cancelForm);
   $("[data-action='update-event-attribute']", parent).change(updateEventAttribute);
+  $(".edit-role", parent).click(editRole);
 }
 
 
