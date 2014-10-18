@@ -20,6 +20,23 @@
       <h3 class='col-sm-8 col-sm-offset-4'>Other commitment {{ forloop.counter }}</h3>
       {% include "_bootstrap_form_horizontal.html" with wrap_form=0 form=other %}
     {% endfor %}
+    <div class='col-sm-8 col-sm-offset-2'>
+      <h2>Role preferences</h2>
+      <p>
+      Please check any of the following roles for which you have a particular
+      preference or skill.
+      </p>
+    </div>
+    <div class='col-sm-8 col-sm-offset-4'>
+      {% for rt, pref in roleprefs %}
+        <p>
+          <label>
+            <input type='checkbox' name='rolepref-{{ rt.id }}'
+              {% if pref %}checked='checked'{% endif %} /> {{ rt }}
+          </label>
+        </p>
+      {% endfor %}
+    </div>
     <div class='row form-group'>
       <div class='col-sm-8 col-sm-offset-4'>
         <button type='submit' class='btn btn-primary btn-lg'>Save Preferences</button>

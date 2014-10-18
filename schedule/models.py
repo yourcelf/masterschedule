@@ -96,6 +96,9 @@ class RoleType(models.Model):
     def __unicode__(self):
         return self.role
 
+    class Meta:
+        ordering = ['role']
+
 class EventRole(models.Model):
     event = models.ForeignKey(Event)
     role = models.ForeignKey(RoleType, blank=True, null=True)
@@ -103,3 +106,10 @@ class EventRole(models.Model):
 
     def __unicode__(self):
         return unicode(self.role)
+
+class RolePreference(models.Model):
+    person = models.ForeignKey(Person)
+    roletype = models.ForeignKey(RoleType)
+
+    def __unicode__(self):
+        return "{} => {}".format(self.person, self.roletype)

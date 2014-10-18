@@ -208,15 +208,22 @@ class AvailabilitySurvey(UpdateView):
         context['othercommitment_formset'] = OtherCommitmentFormset(
                 self.request.POST or None, instance=person)
         context['conference'] = person.conference
+        roleprefs = set(person.rolepreference_set.all().values_list('roletype_id', flat=True))
+        context['roleprefs'] = [(rt, rt.id in roleprefs) for rt in person.conference.roletype_set.all()]
         return context
 
     def form_valid(self, form):
         context = self.get_context_data()
         othercommitment_formset = context['othercommitment_formset']
         if othercommitment_formset.is_valid():
-            form.save()
+            person = form.save()
             instances = othercommitment_formset.save()
-            print instances
+            for rt, pref in context['roleprefs']:
+                wants_pref = bool(self.request.POST.get("rolepref-{}".format(rt.pk)))
+                if pref and not wants_pref:
+                    RolePreference.objects.filter(person=person, roletype=rt).delete()
+                if wants_pref and not pref:
+                    RolePreference.objects.create(person=person, roletype=rt)
             messages.info(self.request, "Thank you! You can come back and change your responses if you need to.")
             return redirect(self.request.path)
         else:
