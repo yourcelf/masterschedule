@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block nav %}{% include "schedule/_conference_nav.html" %}{% endblock %}
+{% block main %}
+<div class='container'>
+  <h1 class='col-sm-8 col-sm-offset-2'>{{ object }} availability</h1>
+
+  <form class='form-horizontal' method='post' action=''>{% csrf_token %}
+    {% include "_bootstrap_form_horizontal.html" with wrap_form=0 %}
+    <div class='col-sm-8 col-sm-offset-2'>
+      <h2>Other commitments</h2>
+      <p>
+        Aside from any roles you have for {{ conference }} already (which we
+        know about!), are there any times during the conference when you are
+        unavailable to volunteer?  If you need more slots, just save this form
+        and more will be added.
+      </p>
+    </div>
+    {{ othercommitment_formset.management_form }}
+    {% for other in othercommitment_formset %}
+      <h3 class='col-sm-8 col-sm-offset-4'>Other commitment {{ forloop.counter }}</h3>
+      {% include "_bootstrap_form_horizontal.html" with wrap_form=0 form=other %}
+    {% endfor %}
+    <div class='row form-group'>
+      <div class='col-sm-8 col-sm-offset-4'>
+        <button type='submit' class='btn btn-primary btn-lg'>Save Preferences</button>
+      </div>
+    </div>
+  </form>
+</div>
+{% endblock %}

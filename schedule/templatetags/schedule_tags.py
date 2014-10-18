@@ -79,5 +79,10 @@ def open_admin_edit_region(context, model, tab=""):
 def close_admin_edit_region():
     return "</div>"
 
-
-
+@register.filter
+def message_alert_class(tags):
+    return {
+        "success": "alert alert-success",
+        "warning": "alert alert-warning",
+        "error": "alert alert-danger",
+    }.get(tags, "alert alert-info")

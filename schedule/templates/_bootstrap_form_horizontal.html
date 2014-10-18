@@ -1,0 +1,68 @@
+{% load widget_tweaks schedule_form_fields %}
+{% if wrap_form != 0 %}
+<form class='form-horizontal' method='post' action='{{ action }}' role='form'>{% csrf_token %}
+{% endif %}
+  {% if form.non_field_errors %}
+    <div class='row form-group'>
+      <div class='col-sm-offset-4 col-sm-8 alert alert-warning'>
+        {{ form.non_field_errors }}
+      </div>
+    </div>
+  {% endif %}
+  {% for field in form %}
+    {% if field.is_hidden %}
+      {{ field }}
+    {% else %}
+      <div class='row form-group {% if field.errors %}has-error{% endif %} {% if field.required %}required{% endif %}'>
+        <label for='{{ field.id_for_label }}' class='col-sm-4 control-label' style='text-align: right;'>
+          {% if field.field.required %}*{% endif %}{{ field.label }}
+        </label>
+        <div class='col-sm-8'>
+          {% if field.errors %}
+            <div class='alert alert-warning'>
+              {{ field.errors }}
+            </div>
+          {% endif %}
+          {% if field.help_text %}
+            <span class='help-block'>{{ field.help_text }}</span>
+          {% endif %}
+          {% if field|is_boolean %}
+            <label>{{ field }} {{ field.label }}</label>
+          {% else %}
+            {% if field|is_date_time_field %}
+              <div data-role='date-time-widget'>
+                <input type='hidden' value='{{ field.value|date:"Y-m-d H:i:s" }}' name='{{ field.html_name }}' data-role='date-time' />
+                <input type='date' value='{{ field.value|date:"Y-m-d" }}'
+                       class='calendar-widget' data-role='date' />
+                <select data-role='hours'>
+                  {% for val,selected in field|hours_for_field %}
+                    <option value='{{ val }}' {% if selected %}selected="selected"{% endif %}>{{ val }}</option>
+                  {% endfor %}
+                </select>:<select data-role='minutes'>
+                  {% for val,selected in field|minutes_for_field %}
+                    <option value='{{ val }}' {% if selected %}selected="selected"{% endif %}>{{ val }}</option>
+                  {% endfor %}
+                </select><select data-role='ampm'>
+                  {% for val,selected in field|ampm_for_field %}
+                    <option value='{{ val }}' {% if selected %}selected="selected"{% endif %}>{{ val }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% else %}
+              {% render_field field class+="form-control" placeholder=field.label %}
+            {% endif %}
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+  {% if submit %}
+    <div class='form-group'>
+      <div class='col-sm-offset-4 col-sm-8'>
+        <input type='submit' value='{{ submit }}' class='btn btn-primary btn-lg' />
+      </div>
+    </div>
+  {% endif %}
+{% if wrap_form != 0 %}
+</form>
+{% endif %}

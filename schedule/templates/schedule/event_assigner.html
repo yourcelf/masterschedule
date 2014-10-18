@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Event assigner | {{ conference }}{% endblock %}
 {% block main %}
-{% include "schedule/_conference_nav.html" %}
 <div class='container'>
   <h1>Events</h1>
   {% if perms.schedule.add_event %}

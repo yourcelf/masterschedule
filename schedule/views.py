@@ -1,7 +1,8 @@
 import json
 import datetime
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseBadRequest, Http404, HttpResponse
+from django.contrib import messages
 from vanilla import ListView, DetailView, UpdateView
 
 from schedule.models import *
@@ -182,13 +183,24 @@ def get_available_people(request, pk):
 class AvailabilitySurvey(UpdateView):
     model = Person
     form_class = AvailabilityForm
+    template_name = "schedule/availability.html"
 
     def get_context_data(self, **kwargs):
         context = super(AvailabilitySurvey, self).get_context_data(**kwargs)
-        context['othercommitment_form'] = OtherCommitmentForm(request.POST or None)
+        person = context['object']
+        context['othercommitment_formset'] = OtherCommitmentFormset(
+                self.request.POST or None, instance=person)
+        context['conference'] = person.conference
         return context
 
     def form_valid(self, form):
         context = self.get_context_data()
-
-
+        othercommitment_formset = context['othercommitment_formset']
+        if othercommitment_formset.is_valid():
+            form.save()
+            instances = othercommitment_formset.save()
+            print instances
+            messages.info(self.request, "Thank you! You can come back and change your responses if you need to.")
+            return redirect(self.request.path)
+        else:
+            return self.render_to_response(context)

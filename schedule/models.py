@@ -14,7 +14,7 @@ class Conference(models.Model):
 class Person(models.Model):
     conference = models.ForeignKey(Conference)
     name = models.CharField(max_length=70)
-    attending = models.BooleanField(default=False,
+    attending = models.BooleanField(default=True,
             help_text="Are you attending?")
     availability_start_date = models.DateTimeField(blank=True, null=True,
             help_text="When are you first available to volunteer?")

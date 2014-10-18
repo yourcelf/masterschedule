@@ -1,4 +1,5 @@
 from django import forms
+from django.forms.models import inlineformset_factory
 
 from schedule.models import *
 
@@ -7,8 +8,7 @@ class AvailabilityForm(forms.ModelForm):
         model = Person
         exclude = ['conference']
 
-class OtherCommitmentForm(forms.ModelForm):
-    class Meta:
-        model = OtherCommitment
-
-#OtherCommitmentFormset = forms.inlineformset_factory(AvailabilityForm, OtherCommitmentForm, extra=2)
+OtherCommitmentFormset = inlineformset_factory(Person,
+        OtherCommitment,
+        extra=2,
+        fields=['start_date', 'end_date'])

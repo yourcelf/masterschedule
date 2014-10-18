@@ -1,16 +1,18 @@
 {% extends "base.html" %}
 {% block title %}{{ conference }} People{% endblock %}
+{% block nav %}{% include "schedule/_conference_nav.html" %}{% endblock %}
 
 {% block main %}
-{% include "schedule/_conference_nav.html" %}
 <div class='container'>
   <h1>{{ conference }} People</h1>
-  <p><a class='btn btn-primary' href=''>Add person</a></p>
+  {% if perms.schedule.add_person %}
+    <p><a class='btn btn-primary' href='{% url "admin:schedule_person_add" %}'>Add person</a></p>
+  {% endif %}
   <ul>
     {% for person in object_list %}
       <li>
         {{ person }} &ndash; 
-        <!--<a href='{% url "availability_survey" person.pk %}'>availability</a> &ndash;-->
+        <a href='{% url "availability_survey" person.pk %}'>availability</a> &ndash;
         <a href='{% url "personal_schedule" person.pk %}'>schedule</a>
       </li>
     {% endfor %}
