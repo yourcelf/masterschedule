@@ -47,9 +47,9 @@ $(document).ready(function() {
   $(".chunk").each(setWidth);
   var total = 0;
   $(".chunk").each(function() {
-    total += $(this).outerWidth(true);
+    total = Math.max(total, $(this).outerWidth(true));
   });
-  $(".ms").width(total + 200);
+  $(".ms").width(total);
   $(".time-block").each(setWidth);
   $(".time-block").each(setX);
   $(".chunk").each(function(i, el) {
