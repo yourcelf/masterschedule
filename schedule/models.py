@@ -14,12 +14,20 @@ class Conference(models.Model):
 class Person(models.Model):
     conference = models.ForeignKey(Conference)
     name = models.CharField(max_length=70)
-    availability_start_date = models.DateTimeField(blank=True, null=True)
-    availability_end_date = models.DateTimeField(blank=True, null=True)
-    want_airport_pickup = models.BooleanField(default=False)
-    airport_pickup_details = models.TextField(blank=True)
-    want_airport_dropoff = models.BooleanField(default=False)
-    airport_dropoff_details = models.TextField(blank=True)
+    attending = models.BooleanField(default=False,
+            help_text="Are you attending?")
+    availability_start_date = models.DateTimeField(blank=True, null=True,
+            help_text="When are you first available to volunteer?")
+    availability_end_date = models.DateTimeField(blank=True, null=True,
+            help_text="When do you leave?")
+    want_airport_pickup = models.BooleanField(default=False,
+            help_text="Airport pickups might not be available.  But if we have capacity, would you like to get a ride?")
+    airport_pickup_details = models.TextField(blank=True,
+            help_text="Please list your flight information.")
+    want_airport_dropoff = models.BooleanField(default=False,
+            help_text="Airport dropoffs might not be available.  But if we have capacity, would you like to get a ride?")
+    airport_dropoff_details = models.TextField(blank=True,
+            help_text="Please list your flight information.")
 
     def __unicode__(self):
         return self.name

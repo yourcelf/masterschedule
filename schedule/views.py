@@ -2,9 +2,10 @@ import json
 import datetime
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponseBadRequest, Http404, HttpResponse
-from vanilla import ListView, DetailView
+from vanilla import ListView, DetailView, UpdateView
 
 from schedule.models import *
+from schedule.forms import *
 
 class ConferenceList(ListView):
     model = Conference
@@ -178,5 +179,16 @@ def get_available_people(request, pk):
     res = json.dumps([{"value": p.pk, "name": unicode(p)} for p in people])
     return HttpResponse(res, content_type="application/json")
 
-class AvailabilitySurvey(DetailView):
-    pass
+class AvailabilitySurvey(UpdateView):
+    model = Person
+    form_class = AvailabilityForm
+
+    def get_context_data(self, **kwargs):
+        context = super(AvailabilitySurvey, self).get_context_data(**kwargs)
+        context['othercommitment_form'] = OtherCommitmentForm(request.POST or None)
+        return context
+
+    def form_valid(self, form):
+        context = self.get_context_data()
+
+
