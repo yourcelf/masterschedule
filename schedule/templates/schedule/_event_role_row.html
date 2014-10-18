@@ -1,0 +1,58 @@
+<tr class='event-role-row' data-event-id='{{ event.pk }}'>
+  <td style='text-align: right;'>
+    {% if event.period %}
+      <span class='label label-default' data-toggle='tooltip'
+        title='{{ event.start_date|date:"D "}}{{ event.start_date|date:"fA"|lower}}&ndash;{{ event.end_date|date:"fA"|lower}}'>{{event.period}}</span>
+    {% else %}
+      {{ event.start_date|date:"D "}}{{ event.start_date|date:"fA"|lower}}&ndash;{{ event.end_date|date:"fA"|lower}}
+    {% endif %}
+  </td>
+  <td>
+    {{ event.title }}
+  </td>
+  <td>
+    <table class='roles'>
+      <tr class='add-form hide'>
+        <td colspan='3'>
+          <form class='add-role' action='{% url "add_event_role" event.pk %}'>
+            <table>
+              <tr>
+                <td>
+                  <select name='role'>
+                    {% for role in role_types %}
+                      <option value='{{ role.pk }}'>{{ role }}</option>
+                    {% endfor %}
+                  </select><a href='{% url "admin:schedule_roletype_add" %}' title='Add role type' data-toggle='tooltip'><i class='glyphicon glyphicon-plus-sign'></i></a>
+                </td>
+                <td style='vertical-align: top;'>
+                  <span class='person-holder'>Loading...</span>
+                </td>
+                <td>
+                  <button type='submit' class='btn btn-default btn-sm'>Add</button>
+                  <a class='cancel-add-role' href='#'>Cancel</a>
+                </td>
+              </tr>
+            </table>
+          </form>
+        </td>
+      </tr>
+      <tr class='add-button'>
+        <td colspan='3'>
+          <a class='btn btn-default btn-xs btn-block add-role' href='#' data-available-people-url='{% url "get_available_people" event.id %}'>Add Role</a></div>
+      </td>
+    {% for role in event.eventrole_set.all %}
+      <tr>
+        <td>
+          <a class='delete-role' href='{% url "remove_event_role" role.pk %}'><i class='glyphicon glyphicon-trash'></i></a>
+        </td>
+        <th>{{ role.role }}</th>
+        <td style='width: 100%'>
+          {% if role.person %}
+            <a href='{% url "personal_schedule" role.person.pk %}'>{{ role.person }}</a>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+    </table>
+  </td>
+</tr>

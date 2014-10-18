@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+
+{% block title %}Conferences{% endblock %}
+{% block main %}
+  <h1>Conferences</h1>
+  <ul>
+    {% for conference in conferences %}
+      <li><a href='{{ conference.get_absolute_url }}'>{{ conference }}</a></li>
+    {% endfor %}
+  </ul>
+ {% endblock %}

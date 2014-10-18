@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}{{ conference }} People{% endblock %}
+
+{% block main %}
+{% include "schedule/_conference_nav.html" %}
+<div class='container'>
+  <h1>{{ conference }} People</h1>
+  <p><a class='btn btn-primary' href=''>Add person</a></p>
+  <ul>
+    {% for person in object_list %}
+      <li>
+        {{ person }} &ndash; 
+        <!--<a href='{% url "availability_survey" person.pk %}'>availability</a> &ndash;-->
+        <a href='{% url "personal_schedule" person.pk %}'>schedule</a>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock main %}
+

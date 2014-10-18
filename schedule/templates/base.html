@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap-3.2.0-dist/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}vendor/bootstrap-3.2.0-dist/css/bootstrap-theme.css" />
+  <link rel="stylesheet" href="{{ STATIC_URL }}css/screen.css" />
+  <title>{% block title %}{% endblock %}</title>
+</head>
+<body>
+  {% block main %}{% endblock %}
+  <script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery-2.1.1.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}vendor/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+  <script type="text/javascript" src="{{ STATIC_URL }}js/common.js"></script>
+  {% block js %}{% endblock %}
+</body>
+</htmL>

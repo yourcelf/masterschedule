@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Event assigner | {{ conference }}{% endblock %}
+{% block main %}
+{% include "schedule/_conference_nav.html" %}
+<div class='container'>
+  <h1>Events</h1>
+  <a class='btn btn-primary' href='{% url "admin:schedule_event_add" %}'>Add event</a>
+  <table class='ea table table-condensed'>
+    <tr>
+      <th>Date</th>
+      <th>Title</th>
+      <th colspan='2'>Roles</th>
+    </tr>
+
+    {% for event in object_list %}
+      {% include "schedule/_event_role_row.html" %}
+    {% endfor %}
+  </table>
+</div>
+{% endblock %}
+{% block js %}
+  <script src='{{ STATIC_URL }}js/event-assigner.js'></script>
+{% endblock %}

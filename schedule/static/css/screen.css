@@ -1,0 +1,57 @@
+body {
+  width: 100%;
+  height: 100%;
+}
+.ms-page {
+  padding-left: 1em;
+}
+.ms, .ms div {
+  box-sizing: border-box;
+}
+.ms {
+  position: relative;
+  font-size: 12px;
+}
+.ms .chunk {
+  position: relative;
+  margin-left: 1em;
+}
+.ms .timeseries {
+  position: relative;
+  width: 100%;
+  height: 20px;
+}
+.ms .time-block {
+  position: absolute;
+  border: 1px solid black;
+}
+.ms .ms-label {
+  height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ms .header .time-block {
+  background-color: #eee;
+}
+
+.ms .periods .time-block {
+  background-color: orange;
+}
+
+.ms .events .time-block {
+  background-color: pink;
+}
+
+table.ea > tr > td, table.ea > tr > th {
+  font-size: 90%;
+}
+table.ea > tr > th {
+  text-align: center;
+}
+.ea table.roles {
+  width: 100%;
+}
+.ea table.roles th, .ea table.roles td {
+  padding: 0.1em
+}
