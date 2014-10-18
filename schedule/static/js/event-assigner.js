@@ -14,13 +14,13 @@ function showAddRoleForm(event, formdata) {
         select.val(formdata.personId);
       }
     });
+  } else if (formdata && formdata.personId) {
+    $("[name=person]").val(formdata.personId);
   } else {
-      if (formdata && formdata.personId) {
-        $("[name=person]").val(formdata.personId);
-      }
+    $("[name=person]").val('');
   }
   parent.find(".add-button").hide();
-  parent.find(".add-form").removeClass("hide");
+  parent.find(".add-form").removeClass("hide").animateHighlight();
   if (formdata) {
     parent.find("[name=role]").val(formdata.roleTypeId);
     parent.find("[name=id]").val(formdata.id);
@@ -97,9 +97,11 @@ function registerHandlers(parent) {
 
 
 function updateRow(selector, data) {
-    var $data = $(data);
-    registerHandlers($data);
-    selector.replaceWith($data);
+  var $data = $(data);
+  registerHandlers($data);
+  selector.replaceWith($data);
+  $data.animateHighlight();
+  $data[0].scrollIntoView();
 }
 
 registerHandlers(document);
