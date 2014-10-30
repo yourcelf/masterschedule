@@ -1,77 +1,86 @@
-function showAddRoleForm(event, formdata) {
-  event.preventDefault();
-  var url = $(event.currentTarget).attr("data-available-people-url");
-  var parent = $(event.currentTarget).closest("table.roles");
-  if (parent.find(".person-holder").length > 0) {
-    $.get(url, function(data) {
-      var select = $("<select name='person'></select>");
-      select.append($("<option value=''></option>"));
-      for (var i = 0; i < data.length; i++) {
-        select.append($("<option value='" + data[i].value + "'>" + data[i].name + "</option>"));
-      }
-      parent.find(".person-holder").replaceWith(select);
-      if (formdata && formdata.personId) {
-        select.val(formdata.personId);
-      }
-    });
-  } else if (formdata && formdata.personId) {
-    $("[name=person]").val(formdata.personId);
-  } else {
-    $("[name=person]").val('');
-  }
-  parent.find(".add-button").hide();
-  parent.find(".add-form").removeClass("hide").animateHighlight();
-  if (formdata) {
-    parent.find("[name=role]").val(formdata.roleTypeId);
-    parent.find("[name=id]").val(formdata.id);
-    parent.find("[type=submit]").html("Update");
-  } else {
-    parent.find("[type=submit]").html("Add");
-  }
+function registerHandlers(parent) {
+  $(".add-event-role, .edit-event-role", parent).click(showAddEventRoleForm);
+  $(".remove-event-role", parent).click(removeEventRole);
+  $("[data-action='update-event-attribute']", parent).change(updateEventAttribute);
 }
-function deleteRole(event) {
+
+var addFormModalTemplate = _.template($("#add-event-role-modal").html());
+var personRowTemplate = _.template($("#person-select-row").html());
+
+function showAddEventRoleForm(event) {
   event.preventDefault();
   var $el = $(event.currentTarget);
-  $.post($(event.currentTarget).attr("href"), function(data) {
-    updateRow($(event.currentTarget).closest(".event-role-row"), data);
-  });
-}
-function editRole(event) {
-  event.preventDefault();
-  var $el = $(event.currentTarget);
-  var data = {
-    id: $el.attr("data-role-id"),
+  var formData = {
+    eventId: $el.attr("data-event-id"),
+    eventRoleId: $el.attr("data-event-role-id"),
     roleTypeId: $el.attr("data-roletype-id"),
     personId: $el.attr("data-person-id")
   };
-  showAddRoleForm(event, data);
-}
-function addRole(event) {
-  var form = $(event.currentTarget);
-  event.preventDefault();
-  var url = form.attr("action");
-  var data = {
-    person: form.find("[name=person]").val(),
-    role: form.find("[name=role]").val()
-  };
-  var id = form.find("[name=id]").val();
-  if (id) {
-    data.id = id;
-  }
-  if (data.role == "") {
-    alert("Please add a role.");
-    return;
-  }
+  formData.buttonLabel = formData.eventRoleId ? "Update" : "Add";
 
-  $.post(url, data, function(data) {
-    updateRow(form.closest(".event-role-row"), data);
+  var modal = $(addFormModalTemplate(formData));
+  var personHolder = modal.find(".person-holder");
+  var personUrl = personHolder.attr("data-url");
+
+  // Update people list
+  var personSelect = modal.find("[name=person]");
+  modal.find("[name=role]").on("change", function(roleEvent) {
+    var val = $(roleEvent.currentTarget).val();
+    personSelect.select2("destroy");
+    personSelect.hide();
+    personHolder.addClass("loading");
+    if (val) {
+      $.get(personUrl, {eventRoleId: val}, function(res) {
+        personHolder.removeClass("loading");
+        personSelect.show();
+        personSelect.select2({
+          data: res,
+          placeholder: "Choose person",
+          formatSelection: personRowTemplate,
+          formatResult: personRowTemplate,
+          allowClear: true
+        });
+      });
+    }
+  }).change();
+
+  var form = modal.find("form");
+  form.on("submit", function(event) {
+    event.preventDefault();
+    var data = {
+      person: form.find("[name=person]").val(),
+      role: form.find("[name=role]").val(),
+      eventRoleId: form.find("[name=eventrole_id]").val(),
+      eventId: form.find("[name=event_id]").val()
+    };
+    if (!data.role) {
+      alert("Please add a role.");
+      return;
+    };
+    var url = form.attr("action");
+    $.post(url, data, function(res) {
+      updateRow($el.closest(".event-role-row"), res);
+    });
+    modal.modal('hide');
   });
+  modal.find(".close, .closeme").on("click", function(event) {
+    event.preventDefault();
+    modal.modal('hide');
+  });
+  modal.on("hidden.bs.modal", function(e) {
+    modal.remove();
+  });
+  $("body").append(modal);
+  modal.modal('show');
 }
-function cancelForm(event) {
+
+function removeEventRole(event) {
   event.preventDefault();
-  var parent = $(event.currentTarget).closest("table.roles");
-  parent.find(".add-button").show();
-  parent.find(".add-form").addClass("hide");
+  var $el = $(event.currentTarget);
+  var data = {eventRoleId: $el.attr("data-event-role-id")}
+  $.post($(event.currentTarget).attr("href"), data, function(res) {
+    updateRow($(event.currentTarget).closest(".event-role-row"), res);
+  });
 }
 function updateEventAttribute(jqevt) {
   jqevt.preventDefault();
@@ -80,19 +89,11 @@ function updateEventAttribute(jqevt) {
   var data = {
     name: $el.attr("name"),
     value: $el.val(),
+    eventId: $el.attr("data-event-id")
   };
   $.post(url, data, function(data) {
     updateRow($el.closest(".event-role-row"), data);
   });
-}
-
-function registerHandlers(parent) {
-  $("a.add-role", parent).click(showAddRoleForm);
-  $("a.delete-role", parent).click(deleteRole);
-  $("form.add-role", parent).submit(addRole);
-  $("a.cancel-add-role", parent).click(cancelForm);
-  $("[data-action='update-event-attribute']", parent).change(updateEventAttribute);
-  $(".edit-role", parent).click(editRole);
 }
 
 
@@ -101,7 +102,6 @@ function updateRow(selector, data) {
   registerHandlers($data);
   selector.replaceWith($data);
   $data.animateHighlight();
-  $data[0].scrollIntoView();
 }
 
 registerHandlers(document);

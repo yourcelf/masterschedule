@@ -1,5 +1,5 @@
 <tr class='event-role-row' data-event-id='{{ event.pk }}'>
-  <td style='text-align: right;'>
+  <td class='date'>
     {% if event.period %}
       <span class='label label-default' data-toggle='tooltip'
         title='{{ event.start_date|date:"D "}}{{ event.start_date|date:"fA"|lower}}&ndash;{{ event.end_date|date:"fA"|lower}}'>{{event.period}}</span>
@@ -7,61 +7,41 @@
       {{ event.start_date|date:"D "}}{{ event.start_date|date:"fA"|lower}}&ndash;{{ event.end_date|date:"fA"|lower}}
     {% endif %}
   </td>
-  <td>
-    {{ event.title }}
-  </td>
-  <td>
-    <table class='roles'>
-      <tr class='add-form hide'>
-        <td colspan='3'>
-          <form class='add-role' action='{% url "add_event_role" event.pk %}'>{% csrf_token %}
-            <input type='hidden' name='id' value=''>
-            <nobr>
-              <select name='role'>
-                {% for role in role_types %}
-                  <option value='{{ role.pk }}'>{{ role }}</option>
-                {% endfor %}
-              </select>
-              {% if perms.schedule.add_roletype %}
-                <a href='{% url "admin:schedule_roletype_add" %}' title='Add role type' data-toggle='tooltip'><i class='glyphicon glyphicon-plus-sign'></i></a>
-              {% endif %}
-              <span class='person-holder'>Loading...</span>
-              <button type='submit' class='btn btn-default btn-sm'>Add</button>
-              <a class='cancel-add-role' href='#'>Cancel</a>
-            </nobr>
-          </form>
-        </td>
-      </tr>
-      <tr class='add-button'>
-        <td colspan='3'>
-          <a class='btn btn-default btn-xs add-role' href='#' data-available-people-url='{% url "get_available_people" event.id %}'>Add Role</a></div>
-        </td>
-      </tr>
+  <td class='title'>{{ event.title }}</td>
+  <td class='roles'>
+      <a class='btn btn-default btn-xs add-event-role'
+        href='#' data-event-id='{{ event.pk }}'>
+         Add Role
+       </a>
+    <ul class='event-roles'>
     {% for role in event.eventrole_set.all %}
-      <tr>
-        <td>
-          <a class='delete-role' href='{% url "remove_event_role" role.pk %}'><i class='glyphicon glyphicon-trash'></i></a>
-        </td>
-        <th style='width: 1%;'>{{ role.role }}</th>
-        <td>
+      <li>
+      <a class='remove-event-role' href='{% url "remove_event_role" %}'
+         data-event-role-id='{{ role.id }}'>
+          <i class='glyphicon glyphicon-trash'></i>
+        </a>
+        <span class='role-name'>{{ role.role }}</span>
+        <span class='role-assignment'>
           {% if role.person %}
             <a href='{% url "personal_schedule" role.person.pk %}'>{{ role.person }}</a>
           {% endif %}
-          <a class='edit-role' href='#'
-              data-available-people-url='{% url "get_available_people" event.id %}'
-              data-role-id='{{ role.id }}'
+          <a class='edit-event-role' href='#'
+              data-event-id='{{ event.id }}'
+              data-event-role-id='{{ role.id }}'
               data-roletype-id='{{ role.role.id }}'
-              data-person-id='{{ role.person.id }}'
-              data-person-name='{{ role.person|escapejs }}'><i class='glyphicon glyphicon-pencil'></i></a>
-        </td>
-      </tr>
+              data-person-id='{{ role.person.id }}'>
+            {% if not role.person %}&lt;assign&gt;{% endif %}
+            <i class='glyphicon glyphicon-pencil'></i>
+          </a>
+        </span>
     {% endfor %}
-    </table>
+    </ul>
   </td>
   <td class='venue'>
     <nobr>
       <select name='venue_id'
-          data-url='{% url "update_event_attribute" event.id %}'
+          data-url='{% url "update_event_attribute" %}'
+          data-event-id='{{ event.pk }}'
           data-action='update-event-attribute'>
         <option value=''></option>
         {% for venue in venues %}

@@ -14,9 +14,11 @@ urlpatterns = patterns('',
     url(r'^(?P<pk>\d+)/survey/$', PersonList.as_view(), name='person_list'),
     url(r'^survey/(?P<pk>\d+)/$', AvailabilitySurvey.as_view(), name='availability_survey'),
     url(r'^my/(?P<pk>\d+)/$', PersonalSchedule.as_view(), name='personal_schedule'),
-    url(r'^event/(?P<pk>\d+)/add-role/', add_event_role, name='add_event_role'),
-    url(r'^event/(?P<pk>\d+)/remove-role/', remove_event_role, name='remove_event_role'),
-    url(r'^event/(?P<pk>\d+)/available-people', get_available_people, name='get_available_people'),
-    url(r'^event/(?P<pk>\d+)/update-event-attribute', update_event_attribute, name='update_event_attribute'),
+
+    # AJAX methods for altering events.
+    url(r'^event/add-role/', add_event_role, name='add_event_role'),
+    url(r'^event/remove-role/', remove_event_role, name='remove_event_role'),
+    url(r'^event/available-people', get_available_people, name='get_available_people'),
+    url(r'^event/update-event-attribute', update_event_attribute, name='update_event_attribute'),
 
 )

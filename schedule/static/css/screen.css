@@ -55,3 +55,40 @@ table.ea > tr > th {
 .ea table.roles th, .ea table.roles td {
   padding: 0.1em
 }
+.ea td.date {
+  text-align: right;
+}
+.ea td.title {
+  max-width: 200px;
+}
+.ea form.add-role {
+  display: none;
+}
+.ea ul.event-roles {
+  list-style: none;
+  padding-left: 0px;
+}
+.person-holder {
+  display: inline-block;
+  width: 250px;
+}
+.select2-container {
+  width: 100%;
+}
+.person-holder .loading {
+  display: none;
+}
+.person-holder.loading .loading {
+  display: inline;
+}
+.person-select .not-available {
+  color: #666;
+}
+.person-select .availability-note {
+  font-size: 80%;
+  color: #553;
+}
+.select2-results .select2-highlighted {
+  background-color: #eef;
+  color: black;
+}

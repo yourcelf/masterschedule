@@ -50,13 +50,11 @@ class MasterSchedule(DetailView):
         time_series = set()
         for object_list in (events, periods):
             for obj in object_list:
-                print obj.start_date, obj.end_date
                 t = obj.start_date
                 while t <= obj.end_date:
                     time_series.add(t)
                     t += resolution
         time_series = sorted(list(time_series))
-        print time_series
 
         # Sort the time series into occupied chunks.
         if time_series:
@@ -136,10 +134,11 @@ def _add_event_context(context, conference):
     return context
 
 
-def add_event_role(request, pk):
+def add_event_role(request):
     if request.method != 'POST':
         return HttpResponseBadRequest("POST required")
-    event = get_object_or_404(Event.objects.select_related('conference'), pk=pk)
+    event = get_object_or_404(Event.objects.select_related('conference'),
+                              pk=request.POST.get("eventId"))
 
     person_id = request.POST.get("person")
     if person_id:
@@ -151,7 +150,7 @@ def add_event_role(request, pk):
     roletype = get_object_or_404(RoleType.objects.filter(conference=event.conference),
             pk=request.POST.get("role"))
 
-    eventrole_id = request.POST.get("id")
+    eventrole_id = request.POST.get("eventRoleId")
     if eventrole_id:
         role = get_object_or_404(EventRole.objects.filter(event=event), pk=eventrole_id)
         role.person = person
@@ -167,20 +166,20 @@ def add_event_role(request, pk):
     _add_event_context(context, event.conference)
     return render(request, "schedule/_event_role_row.html", context)
 
-def remove_event_role(request, pk):
+def remove_event_role(request):
     if request.method != 'POST':
         return HttpResponseBadRequest("POST required")
-    role = get_object_or_404(EventRole, pk=pk)
+    role = get_object_or_404(EventRole, pk=request.POST.get("eventRoleId"))
     event = role.event
     role.delete()
     context = {"event": event}
     _add_event_context(context, event.conference)
     return render(request, "schedule/_event_role_row.html", context)
 
-def update_event_attribute(request, pk):
+def update_event_attribute(request):
     if request.method != "POST":
         return HttpResponseBadRequest("POST required")
-    event = get_object_or_404(Event, pk=pk)
+    event = get_object_or_404(Event, pk=request.POST.get("eventId"))
     name = request.POST.get("name")
     if name not in set(["venue_id"]):
         return HttpResponseBadRequest("Name not allowed.")
@@ -191,10 +190,77 @@ def update_event_attribute(request, pk):
     return render(request, "schedule/_event_role_row.html", context)
 
 
-def get_available_people(request, pk):
-    event = get_object_or_404(Event, pk=pk)
-    people = Person.objects.all()
-    res = json.dumps([{"value": p.pk, "name": unicode(p)} for p in people])
+def get_available_people(request):
+    event_role = get_object_or_404(
+        EventRole.objects.select_related('event', 'event__conference', 'role'),
+        pk=request.GET.get("eventRoleId"))
+
+    event = event_role.event
+
+    people = list(Person.objects.filter(conference=event_role.event.conference))
+    people_ids = [p.id for p in people]
+    preferences = set(RolePreference.objects.filter(person__in=people_ids,
+        roletype=event_role.role).values_list('person_id', flat=True))
+    other_commitments = set(OtherCommitment.objects.filter(person__in=people,
+        start_date__lte=event.end_date, end_date__gte=event.start_date
+    ).values_list('person_id', flat=True))
+    
+    conflicting_roles = {}
+    for role in EventRole.objects.filter(
+                event__start_date__lte=event.end_date,
+                event__end_date__gte=event.start_date,
+            ).exclude(id=event_role.id).select_related('role', 'event'):
+        conflicting_roles[role.person_id] = role
+
+    results = []
+    for person in people:
+        has_submitted_availability = (
+            person.availability_start_date is not None and
+            person.availability_end_date is not None
+        )
+        has_other_commitment = person.id in other_commitments
+        is_generally_available = (
+            has_submitted_availability and
+            person.availability_start_date < event.start_date and
+            person.availability_end_date > event.end_date
+        )
+        has_other_assignment = person.id in conflicting_roles
+        if has_other_assignment:
+            other_assignment = {
+                "role": unicode(conflicting_roles[person.id].role),
+                "event": unicode(conflicting_roles[person.id].event)
+            }
+        else:
+            other_assignment = None
+
+        results.append({
+            "id": person.id,
+            "name": person.name,
+            "preference": person.id in preferences,
+            "attending": person.attending,
+            "is_generally_available": is_generally_available,
+            "has_submitted_availability": has_submitted_availability,
+            "has_other_commitment": has_other_commitment,
+            "has_other_assignment": has_other_assignment,
+            "other_assignment": other_assignment,
+            "available": (
+                person.attending and
+                is_generally_available and
+                not has_other_commitment and
+                not has_other_assignment
+            ),
+        })
+    def sort(obj):
+        return [
+            obj["available"],
+            obj["preference"],
+            obj["attending"] and not obj["has_submitted_availability"],
+            not (obj["has_other_commitment"] or obj["has_other_assignment"]),
+        ]
+
+    results.sort(key=sort, reverse=True)
+
+    res = json.dumps({"more": False, "results": results})
     return HttpResponse(res, content_type="application/json")
 
 class AvailabilitySurvey(UpdateView):

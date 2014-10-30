@@ -19,6 +19,66 @@
     {% endfor %}
   </table>
 </div>
+
+<script type='text/template' id='add-event-role-modal'>
+  <div class='modal'>
+    <div class='modal-dialog'>
+      <div class='modal-content'>
+        <form action='{% url "add_event_role" %}' method='post'>
+          {% csrf_token %}
+          <input type='hidden' name='event_id' value='<%= eventId %>' />
+          <input type='hidden' name='eventrole_id' value='<%= eventRoleId %>' />
+          <div class='modal-header'>
+            Add Role
+            <button type='button' class='close'>
+              <span aria-hidden='true'>&times;</span>
+              <span class='sr-only'>Close</span>
+            </button>
+          </div>
+          <div class='modal-body'>
+            <select name='role'>
+              {% for role in role_types %}
+                <option value='{{ role.pk }}'>{{ role }}</option>
+              {% endfor %}
+            </select>
+            {% if perms.schedule.add_roletype %}
+              <a href='{% url "admin:schedule_roletype_add" %}'
+                 title='Add role type'
+                 data-toggle='tooltip'>
+                <i class='glyphicon glyphicon-plus-sign'></i>
+              </a>
+            {% endif %}
+            <span class='person-holder' data-url='{% url "get_available_people" %}'>
+              <img src='{{ STATIC_URL }}/img/spinner.gif' class='loading' />
+              <input type='text' name='person' value='<%= personId %>' />
+            </span>
+          </div>
+          <div class='modal-footer'>
+            <button type='button' class='btn btn-default closeme'>Close</button>
+            <button type='submit' class='btn btn-primary'><%= buttonLabel %></button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</script>
+<script type='text/template' id='person-select-row'>
+  <div class='person-select'>
+    <div class='name <%= preference ? "preference" : "" %> <%= available ? "" : "not-available" %> '>
+      <%= preference ? "+" : "" %> <%= name %>
+    </div>
+    <div class='availability-note'>
+      <%= !attending ? "Not attending. " : "" %>
+      <%= !has_submitted_availability ? "Hasn't submitted availability. " : "" %>
+      <%= has_submitted_availability && !is_generally_available ? "Not present at this time. " : "" %>
+      <%= has_other_commitment ? "Has personal commitment. " : "" %>
+      <% if (has_other_assignment) { %>
+        Is assigned to <%= other_assignment.event %> as <%= other_assignment.role %> during this time.
+      <% } %>
+    </div>
+  </div>
+</script>
+
 {% endblock %}
 {% block js %}
   <script src='{{ STATIC_URL }}js/event-assigner.js'></script>
