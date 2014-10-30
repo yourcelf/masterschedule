@@ -207,6 +207,7 @@ def get_available_people(request):
     
     conflicting_roles = {}
     qs = EventRole.objects.filter(
+        event__conference=event.conference,
         event__start_date__lte=event.end_date,
         event__end_date__gte=event.start_date,
     ).select_related('role', 'event')
