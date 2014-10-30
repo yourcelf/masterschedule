@@ -11,8 +11,9 @@ class OtherCommitmentInline(admin.TabularInline):
     model = OtherCommitment
 
 class PersonAdmin(admin.ModelAdmin):
-    list_display = ['name', 'conference', 'availability_start_date', 'availability_end_date']
-    list_filter = ['conference']
+    list_display = ['name', 'conference', 'attending',
+            'availability_start_date', 'availability_end_date']
+    list_filter = ['conference', 'attending']
     inlines = [OtherCommitmentInline]
 admin.site.register(Person, PersonAdmin)
 
