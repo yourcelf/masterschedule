@@ -191,25 +191,28 @@ def update_event_attribute(request):
 
 
 def get_available_people(request):
-    event_role = get_object_or_404(
-        EventRole.objects.select_related('event', 'event__conference', 'role'),
-        pk=request.GET.get("eventRoleId"))
+    event = get_object_or_404(
+            Event.objects.select_related('conference'),
+            pk=request.GET.get('eventId'))
+    role_type = get_object_or_404(RoleType, pk=request.GET.get("roleTypeId"))
+    event_role_id = request.GET.get("eventRoleId", None)
 
-    event = event_role.event
-
-    people = list(Person.objects.filter(conference=event_role.event.conference))
+    people = list(Person.objects.filter(conference=event.conference))
     people_ids = [p.id for p in people]
     preferences = set(RolePreference.objects.filter(person__in=people_ids,
-        roletype=event_role.role).values_list('person_id', flat=True))
+        roletype=role_type).values_list('person_id', flat=True))
     other_commitments = set(OtherCommitment.objects.filter(person__in=people,
         start_date__lte=event.end_date, end_date__gte=event.start_date
     ).values_list('person_id', flat=True))
     
     conflicting_roles = {}
-    for role in EventRole.objects.filter(
-                event__start_date__lte=event.end_date,
-                event__end_date__gte=event.start_date,
-            ).exclude(id=event_role.id).select_related('role', 'event'):
+    qs = EventRole.objects.filter(
+        event__start_date__lte=event.end_date,
+        event__end_date__gte=event.start_date,
+    ).select_related('role', 'event')
+    if event_role_id is not None:
+        qs = qs.exclude(id=event_role_id)
+    for role in qs:
         conflicting_roles[role.person_id] = role
 
     results = []

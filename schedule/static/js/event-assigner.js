@@ -30,7 +30,12 @@ function showAddEventRoleForm(event) {
     personSelect.hide();
     personHolder.addClass("loading");
     if (val) {
-      $.get(personUrl, {eventRoleId: val}, function(res) {
+      var data = {
+        roleTypeId: val,
+        eventId: formData.eventId,
+        eventRoleId: formData.eventRoleId
+      };
+      $.get(personUrl, data, function(res) {
         personHolder.removeClass("loading");
         personSelect.show();
         personSelect.select2({
