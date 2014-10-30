@@ -238,7 +238,7 @@ def get_available_people(request):
 
         results.append({
             "id": person.id,
-            "name": person.name,
+            "text": person.name,
             "preference": person.id in preferences,
             "attending": person.attending,
             "is_generally_available": is_generally_available,
