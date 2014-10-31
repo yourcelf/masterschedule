@@ -39,19 +39,14 @@
   </td>
   <td class='venue'>
     <nobr>
-      <select name='venue_id'
-          data-url='{% url "update_event_attribute" %}'
-          data-event-id='{{ event.pk }}'
-          data-action='update-event-attribute'>
-        <option value=''></option>
-        {% for venue in venues %}
-          <option value='{{ venue.pk }}'
-              {% if venue == event.venue %}selected="selected"{% endif %}>
-            {{ venue }}
-          </option>
-        {% endfor %}
-
-      </select>{% if perms.schedule.add_venue %}<a href='{% url "admin:schedule_venue_add" %}' title='Add venue' data-toggle='tooltip'><i class='glyphicon glyphicon-plus-sign'></i></a>{% endif %}
+      <input type='text' value='{{ event.venue.id }}' name='venue_id'
+             data-url='{% url "get_available_venues" %}'
+             data-update-url='{% url "update_event_attribute" %}'
+             data-event-id='{{ event.id }}'
+             data-venue-name='{{ event.venue.name }}'/>
+      {% if perms.schedule.add_venue %}
+        <a href='{% url "admin:schedule_venue_add" %}' title='Add venue' data-toggle='tooltip'><i class='glyphicon glyphicon-plus-sign'></i></a>
+      {% endif %}
     </nobr>
   </td>
 </tr>

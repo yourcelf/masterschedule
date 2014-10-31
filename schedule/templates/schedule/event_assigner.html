@@ -78,6 +78,18 @@
     </div>
   </div>
 </script>
+<script type='text/template' id='venue-select-row'>
+  <div class='venue-select'>
+    <div class='name<%= assigned ? " not-available" : "" %>'>
+      <%= text %>
+    </div>
+    <% if (assigned) { %>
+      <div class='availability-note'>
+        <%= assigned %>
+      </div>
+    <% } %>
+  </div>
+</script>
 
 {% endblock %}
 {% block js %}

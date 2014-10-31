@@ -267,6 +267,28 @@ def get_available_people(request):
     res = json.dumps({"more": False, "results": results})
     return HttpResponse(res, content_type="application/json")
 
+def get_available_venues(request):
+    event = get_object_or_404(Event, pk=request.GET.get("eventId"))
+    venues = Venue.objects.filter(conference=event.conference)
+    assignments = {}
+    for venue_id,title in Event.objects.filter(
+                conference=event.conference,
+                venue__isnull=False,
+                start_date__lte=event.end_date,
+                end_date__gte=event.start_date
+            ).exclude(pk=event.id).values_list('venue_id', 'title'):
+        assignments[venue_id] = title
+
+    results = [{
+        "id": v.id,
+        "text": v.name,
+        "assigned": assignments[v.id] if v.id in assignments else None
+    } for v in venues]
+    results.sort(key=lambda r: (bool(r["assigned"]), r["text"]))
+
+    res = json.dumps({"more": False, "results": results})
+    return HttpResponse(res, content_type="application/json")
+
 class AvailabilitySurvey(UpdateView):
     model = Person
     form_class = AvailabilityForm

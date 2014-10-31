@@ -81,10 +81,12 @@ table.ea > tr > th {
 .person-holder.loading .loading {
   display: inline;
 }
-.person-select .not-available {
+.person-select .not-available,
+.venue-select .not-available {
   color: #666;
 }
-.person-select .availability-note {
+.person-select .availability-note,
+.venue-select .availability-note {
   font-size: 80%;
   color: #553;
 }

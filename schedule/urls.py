@@ -4,7 +4,7 @@ from schedule.views import (
         MasterSchedule, PersonalSchedule, ConferenceList,
         EventAssigner, PersonList,  AvailabilitySurvey,
         add_event_role, remove_event_role, get_available_people,
-        update_event_attribute
+        update_event_attribute, get_available_venues
     )
 
 urlpatterns = patterns('',
@@ -20,5 +20,6 @@ urlpatterns = patterns('',
     url(r'^event/remove-role/', remove_event_role, name='remove_event_role'),
     url(r'^event/available-people', get_available_people, name='get_available_people'),
     url(r'^event/update-event-attribute', update_event_attribute, name='update_event_attribute'),
+    url(r'^event/available-venues', get_available_venues, name='get_available_venues'),
 
 )
