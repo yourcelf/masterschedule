@@ -202,14 +202,14 @@ def get_available_people(request):
     preferences = set(RolePreference.objects.filter(person__in=people_ids,
         roletype=role_type).values_list('person_id', flat=True))
     other_commitments = set(OtherCommitment.objects.filter(person__in=people,
-        start_date__lte=event.end_date, end_date__gte=event.start_date
+        start_date__lt=event.end_date, end_date__gt=event.start_date
     ).values_list('person_id', flat=True))
     
     conflicting_roles = {}
     qs = EventRole.objects.filter(
         event__conference=event.conference,
-        event__start_date__lte=event.end_date,
-        event__end_date__gte=event.start_date,
+        event__start_date__lt=event.end_date,
+        event__end_date__gt=event.start_date,
     ).select_related('role', 'event')
     if event_role_id is not None:
         qs = qs.exclude(id=event_role_id)
@@ -274,8 +274,8 @@ def get_available_venues(request):
     for venue_id,title in Event.objects.filter(
                 conference=event.conference,
                 venue__isnull=False,
-                start_date__lte=event.end_date,
-                end_date__gte=event.start_date
+                start_date__lt=event.end_date,
+                end_date__gt=event.start_date
             ).exclude(pk=event.id).values_list('venue_id', 'title'):
         assignments[venue_id] = title
 
