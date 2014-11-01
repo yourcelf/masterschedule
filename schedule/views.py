@@ -157,10 +157,10 @@ def add_event_role(request):
         role.role = roletype
         role.save()
     else:
-        role = EventRole.objects.get_or_create(
+        role = EventRole.objects.create(
             event=event,
             person=person,
-            role=roletype)[0]
+            role=roletype)
     event.eventrole_set.add(role)
     context = {"event": event}
     _add_event_context(context, event.conference)
