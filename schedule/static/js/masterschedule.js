@@ -17,30 +17,38 @@ function setX(i, el) {
       (100 * ((elStart - parentStart) / (parentEnd - parentStart))) + "%"
    );
 }
-var yoffset = 21;
+
 var ystack = {};
 function setY(key, els) {
   if (!ystack[key]) {
     ystack[key] = [];
   }
-  var maxHeight = 0;
+  
+  var maxBottom = 0;
   els.each(function(i, el) {
     var $el = $(el);
-    var start = parseInt($el.attr("data-start-time"));
-    var end = parseInt($el.attr("data-end-time"));
-    var count = 0;
+    var atts = {
+      start: parseInt($el.attr("data-start-time")),
+      end: parseInt($el.attr("data-end-time")),
+      top: 0,
+      bottom: 0
+    };
+
     var other;
     for (var j = 0; j < ystack[key].length; j++) {
       other = ystack[key][j];
-      if (other[0] <= end && other[1] > start) {
-        count += 1;
+      console.log(other);
+      if (atts.end >= other.start && atts.start < other.end) {
+        atts.top = Math.max(atts.top, other.bottom);
       }
     }
-    ystack[key].push([start, end]);
-    $el.css("top", (yoffset * count) + "px");
-    maxHeight = Math.max(count, maxHeight);
+
+    atts.bottom = atts.top + $el.outerHeight(true);
+    ystack[key].push(atts);
+    $el.css("top", atts.top + "px");
+    maxBottom = Math.max(maxBottom, atts.bottom);
   });
-  return (maxHeight + 1) * yoffset;
+  return maxBottom;
 }
 
 $(document).ready(function() {

@@ -23,13 +23,7 @@ body {
 }
 .ms .time-block {
   position: absolute;
-  border: 1px solid black;
-}
-.ms .ms-label {
-  height: 20px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  border: 1px solid #ddd;
 }
 .ms .header .time-block {
   background-color: #eee;
@@ -40,7 +34,16 @@ body {
 }
 
 .ms .events .time-block {
-  background-color: pink;
+  background-color: #ffe;
+}
+
+.ms .events .time-block .ms-label {
+  font-style: italic;
+}
+
+.ms .time-block ul {
+  padding: 0;
+  list-style: none;
 }
 
 table.ea > tr > td, table.ea > tr > th {

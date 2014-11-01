@@ -1,8 +1,8 @@
 from django.conf.urls import patterns, include, url
 
 from schedule.views import (
-        MasterSchedule, PersonalSchedule, ConferenceList,
-        EventAssigner, PersonList,  AvailabilitySurvey,
+        MasterSchedule, PersonalSchedule, RoomSchedule,
+        ConferenceList, EventAssigner, PersonList,  AvailabilitySurvey,
         add_event_role, remove_event_role, get_available_people,
         update_event_attribute, get_available_venues
     )
@@ -14,6 +14,7 @@ urlpatterns = patterns('',
     url(r'^(?P<pk>\d+)/survey/$', PersonList.as_view(), name='person_list'),
     url(r'^survey/(?P<pk>\d+)/$', AvailabilitySurvey.as_view(), name='availability_survey'),
     url(r'^my/(?P<pk>\d+)/$', PersonalSchedule.as_view(), name='personal_schedule'),
+    url(r'^room/(?P<pk>\d+)/$', RoomSchedule.as_view(), name='venue_schedule'),
 
     # AJAX methods for altering events.
     url(r'^event/add-role/', add_event_role, name='add_event_role'),

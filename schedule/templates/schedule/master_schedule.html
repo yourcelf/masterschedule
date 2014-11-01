@@ -46,7 +46,23 @@
               data-type='{{ object.type }}'
               data-start-time='{{ object.start_date|timestamp }}'
               data-end-time='{{ object.end_date|timestamp }}'>
+              {% if object.venue %}
+                <b><a href='{% url "venue_schedule" object.venue_id %}'>{{ object.venue }}</a></b>
+              {% endif %}
               <div class='ms-label'>{{ object.title }}</div>
+              <ul>
+              {% for eventrole in object.eventrole_set.all %}
+                <li>
+                  <b>{{ eventrole.role }}</b>:
+                  {% if eventrole.person %}
+                    <a href='{% url "personal_schedule" eventrole.person.pk %}'>{{ eventrole.person }}</a>
+                  {% else %}
+                    unassigned
+                  {% endif %}
+                </li>
+              {% endfor %}
+              </ul>
+              
             </div>
           {% endfor %}
         </div>

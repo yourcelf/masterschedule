@@ -30,10 +30,10 @@ class MasterSchedule(DetailView):
         events = list(self.event_filter(Event.objects.filter(
                 conference=conference
             )).select_related(
-                'period'
+                'period', 'venue'
             ).prefetch_related(
                 'eventrole_set'
-            ).order_by('start_date'))
+            ).order_by('start_date', 'venue__name'))
         people = list(Person.objects.filter(
                 conference=conference
             ).prefetch_related(
@@ -95,6 +95,20 @@ class PersonalSchedule(MasterSchedule):
         context = super(PersonalSchedule, self).get_context_data(**kwargs)
         context['filter'] = "Schedule for {}".format(unicode(self.person))
         return context
+
+class RoomSchedule(MasterSchedule):
+    def get_object(self):
+        self.venue = get_object_or_404(Venue, pk=self.kwargs['pk'])
+        return self.venue.conference
+
+    def event_filter(self, qs):
+        return qs.filter(venue=self.venue).distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super(RoomSchedule, self).get_context_data(**kwargs)
+        context['filter'] = "Schedule for {}".format(unicode(self.venue))
+        return context
+
 
 class PersonList(CreateView):
     template_name = "schedule/person_list.html"
