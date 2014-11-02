@@ -21,13 +21,24 @@ body {
   width: 100%;
   height: 20px;
 }
+.ms .timeheader {
+  position: relative;
+  width: 100%;
+}
+.ms .timeheader.affix {
+  position: absolute;
+  z-index: 100;
+}
 .ms .time-block {
   position: absolute;
   border: 1px solid #ddd;
   max-height: 250px;
   overflow-y: auto;
 }
-.ms .header .time-block {
+.ms .hour-block,
+.ms .day-block {
+  position: absolute;
+  border: 1px solid #ddd;
   background-color: #eee;
 }
 

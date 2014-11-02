@@ -45,7 +45,6 @@ function setY(key, els) {
         hoverlaps.push(other);
       }
     }
-    console.log($el.attr("data-event-id"), possibleTops);
     var top,bottom,found;
     for (var k = 0; k < possibleTops.length; k++) {
       top = possibleTops[k];
@@ -53,7 +52,6 @@ function setY(key, els) {
       found = true;
       for (var h = 0; h < hoverlaps.length; h++) {
         other = hoverlaps[h];
-        console.log(h, top, bottom, other.top < bottom, other.bottom > top);
         if (other.top < bottom && other.bottom > top) {
           found = false;
           break;
@@ -63,7 +61,6 @@ function setY(key, els) {
         break;
       }
     }
-    console.log("choosing", k, top);
     atts.top = top;
     atts.bottom = bottom;
     ystack[key].push(atts);
@@ -80,10 +77,35 @@ $(document).ready(function() {
     total = Math.max(total, $(this).outerWidth(true));
   });
   $(".ms").width(total);
-  $(".time-block").each(setWidth);
-  $(".time-block").each(setX);
+  $(".time-block,.hour-block,.day-block").each(setWidth);
+  $(".time-block,.hour-block,.day-block").each(setX);
   $(".chunk").each(function(i, el) {
     var height = setY("events-" + i, $(el).find(".events .time-block"));
     $(el).height($(el).height() + height);
+  });
+  var scrollTimeout;
+  $(".timeheader").each(function(i, el) {
+    if (scrollTimeout) {
+      clearTimeout(scrollTimeout);
+    }
+    setTimeout(function() {
+      var $el = $(el);
+      var left = $el.offset().left;
+      var chunk = $el.closest(".chunk");
+      var chunkTop = chunk.offset().top;
+      var chunkBottom = chunkTop + chunk.height();
+      $(window).scroll(function() {
+        var css;
+        var scrollTop = $(window).scrollTop();
+        if (scrollTop > chunkTop && scrollTop < chunkBottom) {
+           $el.addClass("affix");
+           css = {"top": (scrollTop - chunkTop) + "px"};
+        } else {
+           $el.removeClass("affix");
+           css = {"top": "auto"};
+        }
+        $el.css(css);
+      });
+    }, 100);
   });
 });

@@ -13,23 +13,25 @@
           data-start-time='{{ chunk.start|timestamp }}'
           data-end-time='{{ chunk.end|timestamp }}'>
 
-        <div class='timeseries header day'>
-          {% for start,end,label in chunk|chunk_days %}
-            <div class='time-block day'
-                data-start-time='{{ start|timestamp }}'
-                data-end-time='{{ end|timestamp }}'>
-              <div class='ms-label'>{{ label }}</div>
-            </div>
-          {% endfor %}
-        </div>
-        <div class='timeseries header hour'>
-          {% for start,end,label in chunk|chunk_hours %}
-            <div class='time-block hour'
-                data-start-time='{{ start|timestamp }}'
-                data-end-time='{{ end|timestamp }}'>
-              <div class='ms-label'>{{ label }}</div>
-            </div>
-          {% endfor %}
+        <div class='timeheader'>
+          <div class='timeseries header day'>
+            {% for start,end,label in chunk|chunk_days %}
+              <div class='day-block'
+                  data-start-time='{{ start|timestamp }}'
+                  data-end-time='{{ end|timestamp }}'>
+                <div class='ms-label'>{{ label }}</div>
+              </div>
+            {% endfor %}
+          </div>
+          <div class='timeseries header hour'>
+            {% for start,end,label in chunk|chunk_hours %}
+              <div class='hour-block'
+                  data-start-time='{{ start|timestamp }}'
+                  data-end-time='{{ end|timestamp }}'>
+                <div class='ms-label'>{{ label }}</div>
+              </div>
+            {% endfor %}
+          </div>
         </div>
         <div class='timeseries periods'>
           {% for object in chunk.periods %}
