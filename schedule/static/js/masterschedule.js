@@ -1,4 +1,4 @@
-var pixelsPerDay = 2500;
+var pixelsPerDay = 4000;
 var secondsPerDay = 60 * 60 * 24;
 
 function setWidth(i, el) {
@@ -30,20 +30,42 @@ function setY(key, els) {
     var atts = {
       start: parseInt($el.attr("data-start-time")),
       end: parseInt($el.attr("data-end-time")),
+      height: $el.outerHeight(true),
       top: 0,
       bottom: 0
     };
 
+    var possibleTops = [0];
+    var hoverlaps = [];
     var other;
     for (var j = 0; j < ystack[key].length; j++) {
       other = ystack[key][j];
-      console.log(other);
-      if (atts.end >= other.start && atts.start < other.end) {
-        atts.top = Math.max(atts.top, other.bottom);
+      if (atts.end > other.start && atts.start < other.end) {
+        possibleTops.push(other.bottom);
+        hoverlaps.push(other);
       }
     }
-
-    atts.bottom = atts.top + $el.outerHeight(true);
+    console.log($el.attr("data-event-id"), possibleTops);
+    var top,bottom,found;
+    for (var k = 0; k < possibleTops.length; k++) {
+      top = possibleTops[k];
+      bottom = top + atts.height;
+      found = true;
+      for (var h = 0; h < hoverlaps.length; h++) {
+        other = hoverlaps[h];
+        console.log(h, top, bottom, other.top < bottom, other.bottom > top);
+        if (other.top < bottom && other.bottom > top) {
+          found = false;
+          break;
+        }
+      }
+      if (found) {
+        break;
+      }
+    }
+    console.log("choosing", k, top);
+    atts.top = top;
+    atts.bottom = bottom;
     ystack[key].push(atts);
     $el.css("top", atts.top + "px");
     maxBottom = Math.max(maxBottom, atts.bottom);

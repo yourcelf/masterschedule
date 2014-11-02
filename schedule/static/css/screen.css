@@ -24,6 +24,8 @@ body {
 .ms .time-block {
   position: absolute;
   border: 1px solid #ddd;
+  max-height: 250px;
+  overflow-y: auto;
 }
 .ms .header .time-block {
   background-color: #eee;
@@ -38,7 +40,7 @@ body {
 }
 
 .ms .events .time-block .ms-label {
-  font-style: italic;
+  font-weight: bold;
 }
 
 .ms .time-block ul {
