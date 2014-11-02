@@ -59,6 +59,9 @@ class Venue(models.Model):
     def __unicode__(self):
         return self.name
 
+    class Meta:
+        ordering = ['name']
+
 class EventType(models.Model):
     conference = models.ForeignKey(Conference)
     type = models.CharField(max_length=70)

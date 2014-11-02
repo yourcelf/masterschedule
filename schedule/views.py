@@ -3,6 +3,7 @@ import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseBadRequest, Http404, HttpResponse
 from django.contrib import messages
+from django.db.models import Count
 from vanilla import ListView, DetailView, UpdateView, CreateView
 
 from schedule.models import *
@@ -109,6 +110,17 @@ class RoomSchedule(MasterSchedule):
         context['filter'] = "Schedule for {}".format(unicode(self.venue))
         return context
 
+class VenueList(ListView):
+    model = Venue
+    def get_queryset(self):
+        self.conference = get_object_or_404(Conference, pk=self.kwargs['pk'])
+        return Venue.objects.filter(conference=self.conference).annotate(
+                event_count=Count('event'))
+
+    def get_context_data(self, **kwargs):
+        context = super(VenueList, self).get_context_data(**kwargs)
+        context['conference'] = self.conference
+        return context
 
 class PersonList(CreateView):
     template_name = "schedule/person_list.html"

@@ -53,6 +53,9 @@
               {% if object.venue %}
                 <b><a href='{% url "venue_schedule" object.venue_id %}'>{{ object.venue }}</a></b>
               {% endif %}
+              <span class='date'>
+                {{ object.start_date|date:"f" }}&ndash;{{ object.end_date|date:"fA" }}
+              </span>
               {% if object.eventrole_set.all %}
                 <ul>
                   {% for eventrole in object.eventrole_set.all %}

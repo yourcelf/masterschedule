@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block main %}
+<div class='container'>
+  <h2>{{ conference }} Venues</h2>
+  <ul>
+    {% for venue in object_list %}
+      <li><a href='{% url "venue_schedule" venue.pk %}'>{{ venue }}</a> ({{ venue.event_count }} events)</li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
