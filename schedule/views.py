@@ -16,7 +16,11 @@ class ConferenceList(ListView):
 
 class MasterSchedule(DetailView):
     model = Conference
-    template_name = "schedule/master_schedule.html"
+
+    def get_template_names(self):
+        if "flat" in self.request.GET:
+            return "schedule/master_schedule_flat.html"
+        return "schedule/master_schedule.html"
 
     def event_filter(self, qs):
         return qs

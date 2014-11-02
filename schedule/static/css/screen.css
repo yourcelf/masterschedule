@@ -110,3 +110,13 @@ table.ea > tr > th {
   background-color: #eef;
   color: black;
 }
+
+.ms-flat h1 { font-size: 1.4em; }
+.ms-flat h2 { font-size: 1.2em; border-top: 1px solid #999 }
+.ms-flat h3 { font-size: 1.0em; font-weight: bold;}
+.ms-flat {font-size: 90%;}
+@media print {
+  .print-hide {
+      display: none;
+  }
+}

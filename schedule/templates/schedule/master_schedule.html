@@ -6,7 +6,8 @@
 {% block main %}
 
 <div class='ms-page'>
-  <h1>{% firstof filter "Master Schedule" %}</h1>
+  <h1>{% firstof filter "Master Schedule" %} <small><a href='?flat'>Flat view for printing</a></small></h1>
+
   <div class='ms'>
     {% for chunk in chunks %}
       <div class='chunk'
@@ -58,7 +59,7 @@
               </span>
               {% if object.eventrole_set.all %}
                 <ul>
-                  {% for eventrole in object.eventrole_set.all %}
+                  {% for eventrole in object.eventrole_set.all %}{% spaceless %}
                     {% ifchanged eventrole.role %}
                       {% if forloop.counter0 > 0 %}</li>{% endif %}
                       <li><i>{{ eventrole.role }}</i>:
@@ -68,7 +69,7 @@
                     {% else %}
                       unassigned
                     {% endif %}
-                  {% endfor %}
+                  {% endspaceless %}{% endfor %}
                   </li>
                 </ul>
               {% endif %}

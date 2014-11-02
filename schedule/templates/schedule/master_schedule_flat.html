@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% load firstof from future %}
+
+{% block main %}
+<div class='ms-flat container'>
+  <h1>{% firstof filter "Master Schedule" %} <small class='print-hide'>(<a href='?'>Calendar view</a>)</small></h1>
+  {% for chunk in chunks %}
+    {% for event in chunk.events %}
+      {% ifchanged event.start_date|date:"Ymd" %}
+      <h2>{{ event.start_date|date:"l N j" }}</h2>
+      {% endifchanged %}
+      <div class='event'>
+        <h3>{{ event.title }}{% if event.venue %} &ndash; {{ event.venue }}{% endif %}</h3>
+        <div class='date'>
+          {{ event.start_date|date:"f" }}&ndash;{{ event.end_date|date:"fA"}}
+          {% if event.period %}
+          <small>({{ event.period }})</small>
+          {% endif %}
+        </div>
+        {% if event.eventrole_set.all %}
+          <ul>
+            {% for eventrole in event.eventrole_set.all %}{% spaceless %}
+                {% ifchanged eventrole.role %}
+                  {% if forloop.counter0 > 0 %}</li>{% endif %}
+                  <li><i>{{ eventrole.role }}</i>:
+                {% else %},{% endifchanged %}
+              {% if eventrole.person %}
+                {{ eventrole.person }}
+              {% else %}
+                unassigned
+              {% endif %}
+            {% endspaceless %}{% endfor %}
+            </li>
+          </ul>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% endfor %}
+</div>
+
+{% endblock %}
