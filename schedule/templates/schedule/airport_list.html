@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block main %}
+<div class='container'>
+  <h2>{{ conference }} Airport Desires</h2>
+  <h3>Pickups</h3>
+  <ul>
+  {% for person in object_list %}
+    {% if person.want_airport_pickup %}
+    <li>
+      {{ person }}
+      <div style='white-space: pre-wrap'>{{ person.airport_pickup_details }}</div>
+    </li>
+    {% endif %}
+  {% endfor %}
+  <h3>Dropoffs</h3>
+  {% for person in object_list %}
+    {% if person.want_airport_dropoff %}
+    <li>
+      {{ person }}
+      <div style='white-space: pre-wrap'>{{ person.airport_dropoff_details }}</div>
+    </li>
+    {% endif %}
+  {% endfor %}
+</div>
+{% endblock %}

@@ -3,7 +3,7 @@ import datetime
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseBadRequest, Http404, HttpResponse
 from django.contrib import messages
-from django.db.models import Count
+from django.db.models import Count, Q
 from vanilla import ListView, DetailView, UpdateView, CreateView
 
 from schedule.models import *
@@ -143,6 +143,21 @@ class PersonList(CreateView):
             **form.cleaned_data
         )
         return redirect(self.request.path)
+
+class AirportDesires(ListView):
+    model = Person
+    template_name = "schedule/airport_list.html"
+
+    def get_queryset(self):
+        self.conference = get_object_or_404(Conference, pk=self.kwargs['pk'])
+        return Person.objects.filter(conference=self.conference).filter(
+                Q(want_airport_pickup=True) | Q(want_airport_dropoff=True))
+
+    def get_context_data(self, **kwargs):
+        context = super(AirportDesires, self).get_context_data()
+        context['conference'] = self.conference
+        return context
+
 
 class EventAssigner(ListView):
     template_name = "schedule/event_assigner.html"
