@@ -15,7 +15,7 @@ urlpatterns = patterns('',
     url(r'^(?P<pk>\d+)/survey/$', PersonList.as_view(), name='person_list'),
     url(r'^(?P<pk>\d+)/airport/$', AirportDesires.as_view(), name='airport_list'),
     url(r'^survey/(?P<pk>\d+)/$', AvailabilitySurvey.as_view(), name='availability_survey'),
-    url(r'^my/(?P<pk>\d+)/$', PersonalSchedule.as_view(), name='personal_schedule'),
+    url(r'^my/(?P<slug>.*)/$', PersonalSchedule.as_view(), name='personal_schedule'),
     url(r'^room/(?P<pk>\d+)/$', RoomSchedule.as_view(), name='venue_schedule'),
 
     # AJAX methods for altering events.

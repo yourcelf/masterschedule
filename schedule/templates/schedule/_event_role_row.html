@@ -23,7 +23,7 @@
         <span class='role-name'>{{ role.role }}</span>
         <span class='role-assignment'>
           {% if role.person %}
-            <a href='{% url "personal_schedule" role.person.pk %}'>{{ role.person }}</a>
+            <a href='{% url "personal_schedule" role.person.random_slug %}'>{{ role.person }}</a>
           {% endif %}
           <a class='edit-event-role' href='#'
               data-event-id='{{ event.id }}'

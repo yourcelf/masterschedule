@@ -119,7 +119,7 @@ class MasterSchedule(DetailView):
 
 class PersonalSchedule(MasterSchedule):
     def get_object(self):
-        self.person = get_object_or_404(Person, pk=self.kwargs['pk'])
+        self.person = get_object_or_404(Person, random_slug=self.kwargs['slug'])
         return self.person.conference
 
     def event_filter(self, qs):

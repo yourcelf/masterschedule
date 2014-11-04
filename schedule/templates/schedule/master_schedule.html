@@ -65,7 +65,7 @@
                       <li><i>{{ eventrole.role }}</i>:
                     {% else %},{% endifchanged %}
                     {% if eventrole.person %}
-                      <a href='{% url "personal_schedule" eventrole.person.pk %}'>{{ eventrole.person }}</a>
+                      <a href='{% url "personal_schedule" eventrole.person.random_slug %}'>{{ eventrole.person }}</a>
                     {% else %}
                       unassigned
                     {% endif %}

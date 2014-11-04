@@ -16,7 +16,7 @@
       <li>
         {{ person }} &ndash; 
         <a href='{% url "availability_survey" person.pk %}'>availability</a> &ndash;
-        <a href='{% url "personal_schedule" person.pk %}'>schedule</a>
+        <a href='{% url "personal_schedule" person.random_slug %}'>schedule</a>
       </li>
     {% endfor %}
   </ul>
