@@ -34,9 +34,10 @@ class MasterSchedule(DetailView):
         for chunk in context['chunks']:
             for event in chunk['events']:
                 vevent = ical.add('vevent')
-                vevent.add('summary').value = u"\n".join([
+                vevent.add('summary').value = u" ".join([
                     event.title
-                ] + [
+                ])
+                vevent.add('description').value = u"\n".join([
                     u"{}: {}".format(r.role, r.person) for r in event.eventrole_set.all()
                 ])
                 vevent.add('uid').value = unicode(event.id)
