@@ -1,9 +1,15 @@
 {% extends "base.html" %}
 {% load firstof from future %}
+{% load schedule_tags %}
 
 {% block main %}
 <div class='ms-flat container'>
   <h1>{% firstof filter "Master Schedule" %} <small class='print-hide'>(<a href='?'>Calendar view</a>)</small></h1>
+  <div style='float: right;'>
+    <a href='{{ ical_url }}'>
+    <img style='float: right;' src='{{ ical_url|qrcode_datauri }}' /><br />
+    ICS Calendar Feed</a>
+  </div>
   {% for chunk in chunks %}
     {% for event in chunk.events %}
       {% ifchanged event.start_date|date:"Ymd" %}

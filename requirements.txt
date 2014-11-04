@@ -3,3 +3,5 @@ django-widget-tweaks
 pytz
 django-vanilla-views
 vobject
+qrcode
+pillow

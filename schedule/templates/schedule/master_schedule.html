@@ -6,7 +6,7 @@
 {% block main %}
 
 <div class='ms-page'>
-  <h1>{% firstof filter "Master Schedule" %} <small><a href='?flat'>Flat view for printing</a></small></h1>
+  <h1>{% firstof filter "Master Schedule" %} <small><a href='?flat'>Flat view for printing</a></small> <a href='?ical'><img src='{{ STATIC_URL }}img/ical.gif' alt='ical format' /></a></h1>
 
   <div class='ms'>
     {% for chunk in chunks %}

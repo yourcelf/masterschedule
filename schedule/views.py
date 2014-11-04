@@ -115,7 +115,11 @@ class MasterSchedule(DetailView):
                         chunk[key].append(obj)
                         break
 
-        context.update({"chunks": chunks})
+        context["chunks"] = chunks
+        # TODO: Factor out site URL.
+        context['ical_url'] = "https://masterschedule.tirl.org{}?ical".format(
+            self.request.path
+        )
         return context
 
 class PersonalSchedule(MasterSchedule):
