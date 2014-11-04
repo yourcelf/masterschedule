@@ -5,6 +5,7 @@ from django.http import HttpResponseBadRequest, Http404, HttpResponse
 from django.contrib import messages
 from django.db.models import Count, Q
 from vanilla import ListView, DetailView, UpdateView, CreateView
+import vobject
 
 from schedule.models import *
 from schedule.forms import *
@@ -21,6 +22,34 @@ class MasterSchedule(DetailView):
         if "flat" in self.request.GET:
             return "schedule/master_schedule_flat.html"
         return "schedule/master_schedule.html"
+
+    def render_to_response(self, context):
+        if "ical" in self.request.GET:
+            return self.render_ical(context)
+        return super(MasterSchedule, self).render_to_response(context)
+
+    def render_ical(self, context):
+        ical = vobject.iCalendar()
+        ical.add('method').value = 'PUBLISH'
+        for chunk in context['chunks']:
+            for event in chunk['events']:
+                vevent = ical.add('vevent')
+                vevent.add('summary').value = u"\n".join([
+                    event.title
+                ] + [
+                    u"{}: {}".format(r.role, r.person) for r in event.eventrole_set.all()
+                ])
+                vevent.add('uid').value = unicode(event.id)
+                vevent.add('location').value = unicode(event.venue)
+                vevent.add('dtstart').value = event.start_date
+                vevent.add('dtend').value = event.end_date
+                vevent.add('priority').value = '5'
+                vevent.add('status').value = 'confirmed'
+        icalstream = ical.serialize()
+        response = HttpResponse(icalstream, content_type='text/calendar')
+        response['Filename'] = 'events.ics'
+        response['Content-Disposition'] = 'atachment: filename=events.ics'
+        return response
 
     def event_filter(self, qs):
         return qs

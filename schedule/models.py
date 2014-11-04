@@ -1,3 +1,6 @@
+import os
+import base64
+
 from django.db import models
 from django.core.urlresolvers import reverse
 
@@ -14,6 +17,7 @@ class Conference(models.Model):
 class Person(models.Model):
     conference = models.ForeignKey(Conference)
     name = models.CharField(max_length=70)
+    random_slug = models.CharField(max_length=64, editable=False)
     attending = models.BooleanField(default=True,
             help_text="Are you attending?")
     availability_start_date = models.DateTimeField(blank=True, null=True,
@@ -28,6 +32,16 @@ class Person(models.Model):
             help_text="Airport dropoffs might not be available.  But if we have capacity, would you like to get a ride?")
     airport_dropoff_details = models.TextField(blank=True,
             help_text="Please list your flight information.")
+
+    def set_random_slug(self):
+        self.random_slug = base64.urlsafe_b64encode(
+            os.urandom(32)
+        ).replace("=", "%3D")
+
+    def save(self, *args, **kwargs):
+        if not self.random_slug:
+            self.set_random_slug()
+        super(Person, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name

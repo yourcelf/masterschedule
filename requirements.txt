@@ -2,3 +2,4 @@ django>=1.7
 django-widget-tweaks
 pytz
 django-vanilla-views
+vobject
