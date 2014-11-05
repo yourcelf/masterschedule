@@ -1,8 +1,10 @@
 import json
 import datetime
+from collections import defaultdict
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseBadRequest, Http404, HttpResponse
 from django.contrib import messages
+from django.conf import settings
 from django.db.models import Count, Q
 from vanilla import ListView, DetailView, UpdateView, CreateView
 import vobject
@@ -116,10 +118,7 @@ class MasterSchedule(DetailView):
                         break
 
         context["chunks"] = chunks
-        # TODO: Factor out site URL.
-        context['ical_url'] = "https://masterschedule.tirl.org{}?ical".format(
-            self.request.path
-        )
+        context['ical_url'] = "{}{}?ical".format(settings.BASE_URL, self.request.path)
         return context
 
 class PersonalSchedule(MasterSchedule):
@@ -146,6 +145,44 @@ class RoomSchedule(MasterSchedule):
     def get_context_data(self, **kwargs):
         context = super(RoomSchedule, self).get_context_data(**kwargs)
         context['filter'] = "Schedule for {}".format(unicode(self.venue))
+        return context
+
+class PrintAll(DetailView):
+    model = Conference
+    template_name = "schedule/print_all.html"
+
+    def get_context_data(self):
+        context = super(PrintAll, self).get_context_data()
+        events = {}
+        for event in Event.objects.filter(conference=context['object']):
+            events[event.pk] = event
+
+        events = Event.objects.filter(
+                conference=context['object']
+            ).select_related(
+                'venue', 'period'
+            ).prefetch_related(
+                'eventrole_set',
+                'eventrole_set__person',
+                'eventrole_set__role'
+            ).order_by('start_date')
+        people = defaultdict(lambda: {"events": []})
+        for event in events:
+            for eventrole in event.eventrole_set.all():
+                if eventrole.person:
+                    people[eventrole.person_id]['events'].append(event)
+                    people[eventrole.person_id]['person'] = eventrole.person
+
+        for person_id, person_context in people.iteritems():
+            person_context['ical_url'] = "".join((
+                settings.BASE_URL,
+                reverse('personal_schedule',
+                        args=[person_context['person'].random_slug]),
+                "?ical"
+            ))
+
+        context['people'] = people.values()
+        context['people'].sort(key=lambda p: p['person'].name)
         return context
 
 class VenueList(ListView):

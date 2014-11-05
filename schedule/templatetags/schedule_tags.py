@@ -91,7 +91,7 @@ def message_alert_class(tags):
     }.get(tags, "alert alert-info")
 
 @register.filter
-def qrcode_datauri(data, pixel_size=5, border_pixels=1, error_correction="H"):
+def qrcode_datauri(data, pixel_size=2, border_pixels=1, error_correction="H"):
     qrcode_object = qrcode.QRCode(
         error_correction=getattr(
             qrcode.constants,

@@ -5,6 +5,7 @@
 {% block main %}
 <div class='container'>
   <h1>{{ conference }} People</h1>
+  <a href='{% url "print_all" conference.id %}'>List all schedules for printing</a>
   <p>
     <form method='post' action=''>{% csrf_token %}
       {{ form }}

@@ -1,0 +1,7 @@
+{% load schedule_tags %}
+<div style='float: right; display: inline-block; text-align: center;'>
+  <img style='float: right;' src='{{ ical_url|qrcode_datauri }}' />
+  <div style='clear: both;'>
+    ICS Calendar Feed
+  </div>
+</div>
