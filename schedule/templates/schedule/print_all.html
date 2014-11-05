@@ -3,9 +3,9 @@
 
 {% block main %}
   {% for p in people %}
-    <div class='ms-flat container'>
+    <div class='ms-flat container' style='page-break-before: right'>
       {% include "schedule/_ical_qrcode.html" with ical_url=p.ical_url %}
-      <h1 style='page-break-before: right'>{{ p.person }} Schedule</h1>
+      <h1>{{ p.person }} Schedule</h1>
       {% include "schedule/_flat_event_list.html" with events=p.events %}
     </div>
   {% endfor %}
