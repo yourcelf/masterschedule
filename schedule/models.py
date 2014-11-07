@@ -1,5 +1,6 @@
 import os
 import base64
+import uuid
 
 from django.db import models
 from django.core.urlresolvers import reverse
@@ -84,6 +85,7 @@ class EventType(models.Model):
         return "{}: {}".format(self.conference, self.type)
 
 class Event(models.Model):
+    guid = models.CharField(max_length=36, unique=True)
     conference = models.ForeignKey(Conference)
     title = models.CharField(max_length=255)
     venue = models.ForeignKey(Venue, blank=True, null=True)
@@ -98,6 +100,8 @@ class Event(models.Model):
     url = models.URLField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
+        if not self.guid:
+            self.guid = str(uuid.uuid4())
         if self.period:
             self.start_date = self.period.start_date
             self.end_date = self.period.end_date

@@ -42,7 +42,7 @@ class MasterSchedule(DetailView):
                 vevent.add('description').value = u"\n".join([
                     u"{}: {}".format(r.role, r.person) for r in event.eventrole_set.all()
                 ])
-                vevent.add('uid').value = unicode(event.id)
+                vevent.add('uid').value = unicode(event.guid)
                 vevent.add('location').value = unicode(event.venue)
                 vevent.add('dtstart').value = event.start_date
                 vevent.add('dtend').value = event.end_date
