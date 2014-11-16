@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load schedule_tags %}
+{% block title %}Printable schedule for everyone in {{ conference }}{% endblock %}
 
 {% block main %}
   {% for p in people %}

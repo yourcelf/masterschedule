@@ -14,10 +14,11 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
-        <li><a href='{% url "event_assigner" conference.id %}'>Event assigner</a></li>
-        <li><a href='{% url "person_list" conference.id %}'>Availability prefs</a></li>
-        <li><a href='{% url "venue_list" conference.id %}'>Venues</a></li>
-        <li><a href='{% url "airport_list" conference.id %}'>Airport</a></li>
+        <li><a href='{% url "event_assigner" conference.random_slug %}'>Event assigner (admin)</a></li>
+        <li><a href='{% url "person_crud" conference.random_slug %}'>People</a></li>
+        <li><a href='{% url "venue_crud" conference.random_slug %}'>Venues</a></li>
+        <li><a href='{% url "roletype_crud" conference.random_slug %}'>Role Types</a></li>
+        <li><a href='{% url "airport_list" conference.random_slug %}'>Airport</a></li>
       </ul>
     </div><!-- /.navbar-collapse -->
   </div><!-- /.container-fluid -->

@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Venues | {{ conference }}{% endblock %}
+
+{% block main %}
+<div class='container'>
+  <h2>{{ conference }} Venues</h2>
+  {% if is_admin %}
+    <form method='post' action=''>{% csrf_token %}
+      {{ form }}
+      <button type='submit' class='btn btn-primary'>Add Venue</button>
+    </form>
+  {% endif %}
+  <ul>
+    {% for venue in object_list %}
+      <li>
+        <a href='{% url "venue_schedule" venue.random_slug %}'>{{ venue }}</a>
+        ({{ venue.event_count }} events)
+        {% if is_admin %}
+          <button class='btn btn-xs delete-venue' data-venue-id='{{ venue.id }}'>
+            <i class='glyphicon glyphicon-trash'></i>
+          </button>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+{% block js %}
+  <script type='text/javascript'>
+    $(".delete-venue").click(function(event) {
+      event.preventDefault();
+      if (confirm("Really delete? There's no undo.")) {
+        $.ajax({
+          url: document.location.href,
+          type: 'DELETE',
+          data: {venueId: $(event.currentTarget).attr("data-venue-id")},
+          success: function() {
+            document.location.href = document.location.href
+          }
+        });
+      }
+    });
+  </script>
+{% endblock %}

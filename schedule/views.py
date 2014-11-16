@@ -2,23 +2,67 @@ import json
 import datetime
 from collections import defaultdict
 from django.shortcuts import render, get_object_or_404, redirect
-from django.http import HttpResponseBadRequest, Http404, HttpResponse
+from django.http import HttpResponseBadRequest, Http404, HttpResponse, QueryDict
 from django.contrib import messages
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.db.models import Count, Q
-from vanilla import ListView, DetailView, UpdateView, CreateView
+from vanilla import ListView, DetailView, UpdateView, CreateView, GenericView
 import vobject
 
 from schedule.models import *
 from schedule.forms import *
 
+def auth_problems(user, conference):
+    p = {}
+    if not user.is_authenticated():
+        p['not authenticated'] = True
+    if not conference.is_admin(user):
+        p['not admin'] = True
+    return p
+
+def _admin_or_deny(user, conference):
+    if auth_problems(user, conference):
+        raise PermissionDenied
+
+def _problem_response(problems):
+    if problems['not authenticated']:
+        messages.info(
+            "You must log in as an admin of this conference to assign "
+            "roles.")
+        return redirect("auth_login")
+    elif problems['not admin']:
+        messages.info(
+            "You must be an admin of this conference to assign roles. "
+            "Please log in as an admin to continue.")
+        return redirect("auth_login")
+    elif problems:
+        return HttpResponseBadRequest()
+
+class ConferenceCreate(CreateView):
+    model = Conference
+    form_class = CreateConferenceForm
+
+class ConferenceUpdate(UpdateView):
+    model = Conference
+    form_class = UpdateConferenceForm
+    def dispatch(self, request, *args, **kwargs):
+        conference = Conference.objects.get(random_slug=request.POST.slug)
+        problems = auth_problems(request.user, conference)
+        if problems:
+            return _problem_response(problems)
+        return super(ConferenceUpdate, self).dispatch(request, *args, **kwargs)
+
 class ConferenceList(ListView):
     model = Conference
     def get_queryset(self):
-        return Conference.objects.order_by('-created')
+        return Conference.objects.public_for(self.request.user)
 
 class MasterSchedule(DetailView):
     model = Conference
+
+    def get_object(self):
+        return Conference.objects.get(random_slug=self.kwargs.get("slug"))
 
     def get_template_names(self):
         if "flat" in self.request.GET:
@@ -67,9 +111,9 @@ class MasterSchedule(DetailView):
         events = list(self.event_filter(Event.objects.filter(
                 conference=conference
             )).select_related(
-                'period', 'venue'
+                'period', 'venue', 'type', 'type__conference'
             ).prefetch_related(
-                'eventrole_set'
+                'eventrole_set', 'eventrole_set__person', 'eventrole_set__role',
             ).order_by('start_date', 'venue__name'))
         people = list(Person.objects.filter(
                 conference=conference
@@ -123,7 +167,9 @@ class MasterSchedule(DetailView):
 
 class PersonalSchedule(MasterSchedule):
     def get_object(self):
-        self.person = get_object_or_404(Person, random_slug=self.kwargs['slug'])
+        self.conference = get_object_or_404(Conference, random_slug=self.kwargs['slug'])
+        self.person = get_object_or_404(Person,
+                conference=self.conference, pk=self.kwargs['pk'])
         return self.person.conference
 
     def event_filter(self, qs):
@@ -131,12 +177,12 @@ class PersonalSchedule(MasterSchedule):
 
     def get_context_data(self, **kwargs):
         context = super(PersonalSchedule, self).get_context_data(**kwargs)
-        context['filter'] = "Schedule for {}".format(unicode(self.person))
+        context['filter'] = u"Schedule for {}".format(unicode(self.person))
         return context
 
 class RoomSchedule(MasterSchedule):
     def get_object(self):
-        self.venue = get_object_or_404(Venue, pk=self.kwargs['pk'])
+        self.venue = get_object_or_404(Venue, random_slug=self.kwargs['slug'])
         return self.venue.conference
 
     def event_filter(self, qs):
@@ -144,12 +190,15 @@ class RoomSchedule(MasterSchedule):
 
     def get_context_data(self, **kwargs):
         context = super(RoomSchedule, self).get_context_data(**kwargs)
-        context['filter'] = "Schedule for {}".format(unicode(self.venue))
+        context['filter'] = u"Schedule for {}".format(unicode(self.venue))
         return context
 
 class PrintAll(DetailView):
     model = Conference
     template_name = "schedule/print_all.html"
+
+    def get_object(self):
+        return get_object_or_404(Conference, random_slug=self.kwargs.get("slug"))
 
     def get_context_data(self):
         context = super(PrintAll, self).get_context_data()
@@ -176,8 +225,9 @@ class PrintAll(DetailView):
         for person_id, person_context in people.iteritems():
             person_context['ical_url'] = "".join((
                 settings.BASE_URL,
-                reverse('personal_schedule',
-                        args=[person_context['person'].random_slug]),
+                reverse('personal_schedule', args=[
+                    context['conference'].random_slug, person_context['person'].id
+                ]),
                 "?ical"
             ))
 
@@ -185,42 +235,120 @@ class PrintAll(DetailView):
         context['people'].sort(key=lambda p: p['person'].name)
         return context
 
-class VenueList(ListView):
-    model = Venue
-    def get_queryset(self):
-        self.conference = get_object_or_404(Conference, pk=self.kwargs['pk'])
-        return Venue.objects.filter(conference=self.conference).annotate(
+class VenueCrud(GenericView):
+    def _get_conference(self, slug):
+        return get_object_or_404(Conference.objects.active(), random_slug=slug)
+
+    def get(self, request, slug):
+        conference = self._get_conference(slug)
+        form = VenueForm(request.POST or None)
+        form.is_valid()
+        return render(request, "schedule/venue_crud.html", {
+            "form": form,
+            "is_admin": conference.is_admin(request.user),
+            "conference": conference,
+            "object_list": Venue.objects.filter(conference=conference).annotate(
                 event_count=Count('event'))
+        })
 
-    def get_context_data(self, **kwargs):
-        context = super(VenueList, self).get_context_data(**kwargs)
-        context['conference'] = self.conference
-        return context
+    def post(self, request, slug):
+        conference = self._get_conference(slug)
+        _admin_or_deny(request.user, conference)
+        form = VenueForm(request.POST)
+        if form.is_valid():
+            Venue.objects.get_or_create(
+                    conference=conference,
+                    name=request.POST.get("name"))
+            messages.success(request, "Venue added")
+            return redirect("venue_crud", conference.random_slug) 
+        return self.get()
 
-class PersonList(CreateView):
-    template_name = "schedule/person_list.html"
-    form_class = PersonForm
+    def delete(self, request, slug):
+        params = QueryDict(request.body)
+        venue = get_object_or_404(Venue, pk=params.get("venueId"))
+        _admin_or_deny(request.user, venue.conference)
+        venue.delete()
+        messages.success(request, "Venue deleted")
+        return HttpResponse()
 
-    def get_context_data(self, **kwargs):
-        context = super(PersonList, self).get_context_data(**kwargs)
-        context['conference'] = get_object_or_404(Conference, pk=self.kwargs['pk'])
-        context['object_list'] = context['conference'].person_set.all()
-        return context
+class PersonCrud(GenericView):
+    def get(self, request, slug):
+        conference = get_object_or_404(Conference, random_slug=slug)
+        form = PersonForm(request.POST or None)
+        form.is_valid()
+        return render(request, "schedule/person_crud.html", {
+            "conference": conference,
+            "form": form,
+            "is_admin": conference.is_admin(self.request.user),
+            "object_list": Person.objects.filter(
+                conference=conference
+            ).annotate(event_count=Count('eventrole')),
+        })
 
-    def form_valid(self, form):
-        context = self.get_context_data()
-        person, created = Person.objects.get_or_create(
-            conference=context['conference'],
-            **form.cleaned_data
-        )
-        return redirect(self.request.path)
+    def post(self, request, slug):
+        conference = get_object_or_404(Conference, random_slug=slug)
+        _admin_or_deny(request.user, conference)
+        form = PersonForm(request.POST or None)
+        if form.is_valid():
+            person, created = Person.objects.get_or_create(
+                conference=conference,
+                **form.cleaned_data
+            )
+            messages.success(request, "Person added")
+            return redirect("person_crud", conference.random_slug)
+        return self.get(request, slug)
+
+    def delete(self, request, slug):
+        conference = get_object_or_404(Conference, random_slug=slug)
+        _admin_or_deny(request.user, conference)
+        params = QueryDict(request.body)
+        person = get_object_or_404(Person, conference=conference, pk=params.get("personId"))
+        person.delete()
+        messages.success(request, "Person removed")
+        return HttpResponse()
+
+class RoleTypeCrud(GenericView):
+    def get(self, request, slug):
+        conference = get_object_or_404(Conference.objects.active(), random_slug=slug)
+        form = RoleTypeForm(request.POST or None)
+        form.is_valid()
+        object_list = RoleType.objects.filter(conference=conference).annotate(
+                role_count=Count('eventrole'),
+                person_count=Count('eventrole__person'))
+        return render(request, "schedule/roletype_crud.html", {
+                'conference': conference,
+                'form': form,
+                'is_admin': conference.is_admin(request.user),
+                'object_list': object_list,
+            })
+
+    def post(self, request, slug):
+        conference = get_object_or_404(Conference.objects.active(), random_slug=slug)
+        _admin_or_deny(request.user, conference)
+        form = RoleTypeForm(request.POST or None)
+        if form.is_valid():
+            RoleType.objects.get_or_create(
+                    conference=conference,
+                    role=self.request.POST.get("role"))
+            messages.success(request, "Role type created")
+            return redirect("roletype_crud", slug)
+        return HttpResponse()
+
+    def delete(self, request, slug):
+        conference = get_object_or_404(Conference.objects.active(), random_slug=slug)
+        _admin_or_deny(request.user, conference)
+        params = QueryDict(request.body)
+        roletype = get_object_or_404(RoleType, pk=params.get("roleTypeId"))
+        roletype.delete()
+        messages.success(request, "Role type deleted")
+        return HttpResponse()
 
 class AirportDesires(ListView):
     model = Person
     template_name = "schedule/airport_list.html"
 
     def get_queryset(self):
-        self.conference = get_object_or_404(Conference, pk=self.kwargs['pk'])
+        self.conference = get_object_or_404(Conference, random_slug=self.kwargs['slug'])
         return Person.objects.filter(conference=self.conference).filter(
                 Q(want_airport_pickup=True) | Q(want_airport_dropoff=True))
 
@@ -229,18 +357,29 @@ class AirportDesires(ListView):
         context['conference'] = self.conference
         return context
 
-
 class EventAssigner(ListView):
     template_name = "schedule/event_assigner.html"
+
+    def dispatch(self, request, *args, **kwargs):
+        self.conference = get_object_or_404(Conference, random_slug=self.kwargs['slug'])
+        problems = auth_problems(request.user, self.conference)
+        if problems:
+            return _problem_response(problems)
+        return super(EventAssigner, self).dispatch(request, *args, **kwargs)
+
     def get_queryset(self):
-        self.conference = get_object_or_404(Conference, pk=self.kwargs['pk'])
         return Event.objects.filter(
-                conference__id=self.kwargs['pk']).order_by('start_date'
-            ).prefetch_related('eventrole_set')
+                conference=self.conference
+            ).select_related(
+                'venue', 'period',
+            ).order_by('start_date').prefetch_related(
+                'eventrole_set', 'eventrole_set__person', 'eventrole_set__role'
+            )
 
     def get_context_data(self, **kwargs):
         context = super(EventAssigner, self).get_context_data(**kwargs)
         _add_event_context(context, self.conference)
+        context['is_admin'] = self.conference.is_admin(self.request.user)
         return context
 
 def _add_event_context(context, conference):
@@ -250,52 +389,61 @@ def _add_event_context(context, conference):
     return context
 
 
-def add_event_role(request):
-    if request.method != 'POST':
-        return HttpResponseBadRequest("POST required")
-    event = get_object_or_404(Event.objects.select_related('conference'),
-                              pk=request.POST.get("eventId"))
+class EventRoleAjaxCrud(GenericView):
+    def post(self, request):
+        event = get_object_or_404(Event.objects.select_related("conference"),
+                pk=request.POST.get("eventId"))
+        _admin_or_deny(request.user, event.conference)
 
-    person_id = request.POST.get("person")
-    if person_id:
-        person = get_object_or_404(Person.objects.filter(conference=event.conference),
-                pk=person_id)
-    else:
-        person = None
+        person_id = request.POST.get("person")
+        if person_id:
+            person = get_object_or_404(
+                Person.objects.filter(conference=event.conference),
+                pk=request.POST.get("person")
+            )
+        else:
+            person = None
 
-    roletype = get_object_or_404(RoleType.objects.filter(conference=event.conference),
-            pk=request.POST.get("role"))
+        roletype = get_object_or_404(
+                RoleType.objects.filter(conference=event.conference),
+                pk=request.POST.get("role"))
 
-    eventrole_id = request.POST.get("eventRoleId")
-    if eventrole_id:
-        role = get_object_or_404(EventRole.objects.filter(event=event), pk=eventrole_id)
-        role.person = person
-        role.role = roletype
-        role.save()
-    else:
-        role = EventRole.objects.create(
-            event=event,
-            person=person,
-            role=roletype)
-    event.eventrole_set.add(role)
-    context = {"event": event}
-    _add_event_context(context, event.conference)
-    return render(request, "schedule/_event_role_row.html", context)
+        eventrole_id = request.POST.get("eventRoleId")
+        if eventrole_id:
+            role = get_object_or_404(
+                    EventRole.objects.filter(event=event),
+                    pk=eventrole_id)
+            role.person = person
+            role.role = roletype
+            role.save()
+        else:
+            role = EventRole.objects.create(
+                event=event,
+                person=person,
+                role=roletype)
+        event.eventrole_set.add(role)
+        context = {"event": event}
+        _add_event_context(context, event.conference)
+        return render(request, "schedule/_event_role_row.html", context)
 
-def remove_event_role(request):
-    if request.method != 'POST':
-        return HttpResponseBadRequest("POST required")
-    role = get_object_or_404(EventRole, pk=request.POST.get("eventRoleId"))
-    event = role.event
-    role.delete()
-    context = {"event": event}
-    _add_event_context(context, event.conference)
-    return render(request, "schedule/_event_role_row.html", context)
+    def delete(self, request):
+        params = QueryDict(request.body) 
+        role = get_object_or_404(EventRole, pk=params.get("eventRoleId"))
+        event = role.event
+        _admin_or_deny(request.user, event.conference)
+
+        role.delete()
+        context = {"event": event}
+        _add_event_context(context, event.conference)
+        return render(request, "schedule/_event_role_row.html", context)
 
 def update_event_attribute(request):
     if request.method != "POST":
         return HttpResponseBadRequest("POST required")
-    event = get_object_or_404(Event, pk=request.POST.get("eventId"))
+    event = get_object_or_404(
+            Event.objects.select_related('conference'),
+            pk=request.POST.get("eventId"))
+    _admin_or_deny(request.user, event.conference)
     name = request.POST.get("name")
     if name not in set(["venue_id"]):
         return HttpResponseBadRequest("Name not allowed.")
@@ -305,11 +453,11 @@ def update_event_attribute(request):
     _add_event_context(context, event.conference)
     return render(request, "schedule/_event_role_row.html", context)
 
-
 def get_available_people(request):
     event = get_object_or_404(
             Event.objects.select_related('conference'),
             pk=request.GET.get('eventId'))
+    _admin_or_deny(request.user, event.conference)
     role_type = get_object_or_404(RoleType, pk=request.GET.get("roleTypeId"))
     event_role_id = request.GET.get("eventRoleId", None)
 

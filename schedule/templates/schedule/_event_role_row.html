@@ -16,14 +16,14 @@
     <ul class='event-roles'>
     {% for role in event.eventrole_set.all %}
       <li>
-      <a class='remove-event-role' href='{% url "remove_event_role" %}'
+      <a class='remove-event-role' href='{% url "event_role_crud" %}'
          data-event-role-id='{{ role.id }}'>
           <i class='glyphicon glyphicon-trash'></i>
         </a>
         <span class='role-name'>{{ role.role }}</span>
         <span class='role-assignment'>
           {% if role.person %}
-            <a href='{% url "personal_schedule" role.person.random_slug %}'>{{ role.person }}</a>
+            <a href='{% url "personal_schedule" conference.random_slug role.person_id %}'>{{ role.person }}</a>
           {% endif %}
           <a class='edit-event-role' href='#'
               data-event-id='{{ event.id }}'
@@ -44,8 +44,8 @@
              data-update-url='{% url "update_event_attribute" %}'
              data-event-id='{{ event.id }}'
              data-venue-name='{{ event.venue.name }}'/>
-      {% if perms.schedule.add_venue %}
-        <a href='{% url "admin:schedule_venue_add" %}' title='Add venue' data-toggle='tooltip'><i class='glyphicon glyphicon-plus-sign'></i></a>
+      {% if is_admin %}
+        <a href='{% url "venue_crud" conference.random_slug %}' title='Add venue' data-toggle='tooltip'><i class='glyphicon glyphicon-plus-sign'></i></a>
       {% endif %}
     </nobr>
   </td>

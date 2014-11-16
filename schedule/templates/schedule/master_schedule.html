@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load firstof from future %}
 {% load schedule_tags %}
-{% block title %}{{ conference }} Master Schedule{% endblock %}
+{% block title %}{% firstof filter "Master Schedule" %} | {{ conference }}{% endblock %}
 
 {% block main %}
 
@@ -52,7 +52,7 @@
                 data-end-time='{{ object.end_date|timestamp }}'>
               <div class='ms-label'>{{ object.title }}</div>
               {% if object.venue %}
-                <b><a href='{% url "venue_schedule" object.venue_id %}'>{{ object.venue }}</a></b>
+                <b><a href='{% url "venue_schedule" object.venue.random_slug %}'>{{ object.venue }}</a></b>
               {% endif %}
               <span class='date'>
                 {{ object.start_date|date:"f" }}&ndash;{{ object.end_date|date:"fA" }}
@@ -65,7 +65,7 @@
                       <li><i>{{ eventrole.role }}</i>:
                     {% else %},{% endifchanged %}
                     {% if eventrole.person %}
-                      <a href='{% url "personal_schedule" eventrole.person.random_slug %}'>{{ eventrole.person }}</a>
+                      <a href='{% url "personal_schedule" conference.random_slug eventrole.person.pk %}'>{{ eventrole.person }}</a>
                     {% else %}
                       unassigned
                     {% endif %}

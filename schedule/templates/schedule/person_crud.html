@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block title %}People | {{ conference }}{% endblock %}
+{% block nav %}{% include "schedule/_conference_nav.html" %}{% endblock %}
+
+{% block main %}
+<div class='container'>
+  <h1>{{ conference }} People</h1>
+  <a href='{% url "print_all" conference.random_slug %}'>List all schedules for printing</a>
+  {% if is_admin %}
+    <p>
+      <form method='post' action=''>{% csrf_token %}
+        {{ form }}
+        <input class='btn btn-primary' type='submit' value='Add Person' />
+      </form>
+    </p>
+  {% endif %}
+
+  {% if is_admin %}
+    <button class='btn btn-default' data-toggle='modal' data-target='#survey-urls'>
+      Reveal Survey URLs
+    </button>
+    <div class="modal fade" id='survey-urls'>
+      <div class="modal-dailog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Availability Survey Links</h3>
+            <button type="button" class="close" data-dismiss="modal">
+              <span aria-hidden="true">&times;</span>
+              <span class="sr-only">Close</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <p>
+            Personal links for conference participants. Use caution when
+            sharing these, so that randos don't come by and mess up the
+            results. This list is only available to conference admins.
+            </p>
+            <p>
+              <a class='btn btn-default' href='mailto:?subject={% filter urlencode %}{{ conference.name }} Availability Survey{% endfilter %}&body={% filter urlencode %}Please complete the availability survey for {{ conference.name }} by clicking the link with your name below:
+{% for person in object_list %}
+ - {{ person.name }}: {{ BASE_URL }}{% url "availability_survey" person.random_slug %}{% endfor %}{% endfilter %}'>
+                Copy to Email
+              </a> (Only use this if you trust conference participants not to mess with each other.)
+            </p>
+            <ul>
+              {% for person in object_list %}
+              <li>
+                {{ person.name }}: 
+                <a href='{{ BASE_URL }}{% url "availability_survey" person.random_slug %}'>
+                  {{ BASE_URL }}{% url "availability_survey" person.random_slug %}
+                </a>
+              </li>
+              {% endfor %}
+            </ul>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">
+              Close
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+  
+  <ul>
+    {% for person in object_list %}
+      <li>
+        {{ person }} &ndash; 
+        <a href='{% url "personal_schedule" conference.random_slug person.pk %}'>schedule</a>
+        ({{ person.event_count }} events)
+        <button class='btn btn-xs delete-person' data-person-id='{{ person.id }}'>
+          <i class='glyphicon glyphicon-trash'></i>
+        </button>
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock main %}
+
+{% block js %}
+  <script type='text/javascript'>
+    $(".delete-person").click(function(event) {
+      event.preventDefault()
+      $.ajax({
+        url: document.location.href,
+        type: 'DELETE',
+        data: {personId: $(event.currentTarget).attr("data-person-id")},
+        success: function() {
+          document.location.href = document.location.href;
+        }
+      });
+      $(event.currentTarget).replaceWith("<img src='{{ STATIC_URL }}img/spinner.gif' />");
+    });
+  </script>
+{% endblock %}

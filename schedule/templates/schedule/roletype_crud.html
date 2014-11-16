@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}
+  Role types | {{ conference }}
+{% endblock %}
+
+{% block main %}
+<div class='container'>
+  <h2>{{ conference }} Role Types</h2>
+  {% if is_admin %}
+    <form method='post' action=''>{% csrf_token %}
+      {{ form }}
+      <button type='submit' class='btn btn-primary btn-sm'>Add Role Type</button>
+    </form>
+  {% endif %}
+  <ul>
+    {% for roletype in object_list %}
+      <li>
+        {{ roletype }} ({{ roletype.role_count }} events,
+          {{roletype.person_count }}
+          {% if roletype.person_count == 1 %}person{% else %}people{% endif %})
+        {% if is_admin %}
+          <button class='btn btn-xs delete-roletype' data-roletype-id='{{ roletype.id }}'>
+            <i class='glyphicon glyphicon-trash'></i>
+          </button>
+        {% endif %}
+      </li>
+    {% endfor %}
+  </ul>
+</div>
+{% endblock %}
+{% block js %}
+  <script type='text/javascript'>
+    $(".delete-roletype").click(function(event) {
+      event.preventDefault();
+      if (confirm("Really delete? There's no undo.")) {
+        $.ajax({
+          url: document.location.href,
+          type: 'DELETE',
+          data: {roleTypeId: $(event.currentTarget).attr("data-roletype-id")},
+          success: function() {
+            document.location.href = document.location.href
+          }
+        });
+      }
+    });
+  </script>
+{% endblock %}

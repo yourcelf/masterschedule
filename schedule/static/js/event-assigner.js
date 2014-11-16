@@ -132,8 +132,13 @@ function removeEventRole(event) {
   event.preventDefault();
   var $el = $(event.currentTarget);
   var data = {eventRoleId: $el.attr("data-event-role-id")}
-  $.post($(event.currentTarget).attr("href"), data, function(res) {
-    updateRow($(event.currentTarget).closest(".event-role-row"), res);
+  $.ajax({
+    url: $(event.currentTarget).attr("href"), 
+    data: data,
+    type: "DELETE",
+    success: function(res) {
+      updateRow($(event.currentTarget).closest(".event-role-row"), res);
+    }
   });
 }
 function updateEventAttribute(jqevt) {

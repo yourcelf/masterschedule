@@ -3,22 +3,59 @@ import base64
 import uuid
 
 from django.db import models
+from django.db.models import Q
+from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
 
-class Conference(models.Model):
+def random_slug():
+    return base64.urlsafe_b64encode(os.urandom(32)).replace("=", "%3D")
+
+class RandomSlugModel(models.Model):
+    random_slug = models.CharField(max_length=64, editable=False, unique=True)
+
+    def save(self, *args, **kwargs):
+        if not self.random_slug:
+            self.random_slug = random_slug()
+        super(RandomSlugModel, self).save(*args, **kwargs)
+
+    class Meta:
+        abstract = True
+
+class ConferenceManager(models.Manager):
+    def public_for(self, user):
+        q = Q(public=True)
+        if user.is_authenticated():
+            q = q | Q(admins__id=user.id)
+        return self.active().filter(q).order_by('-created').distinct()
+
+    def editable_by(self, user):
+        return Conference.objects.filter(admins__id=user.id)
+
+    def active(self):
+        return self.filter(archived=False)
+
+class Conference(RandomSlugModel):
     name = models.CharField(max_length=70)
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
+    public = models.BooleanField(default=True)
+    archived = models.BooleanField(default=False)
+    admins = models.ManyToManyField(User)
+
+    objects = ConferenceManager()
+
+    def is_admin(self, user):
+        return (user.is_superuser or self.admins.filter(pk=user.pk).exists())
+
     def get_absolute_url(self):
-        return reverse("master_schedule", kwargs={"pk": self.pk})
+        return reverse("master_schedule", kwargs={"slug": self.random_slug})
 
     def __unicode__(self):
         return self.name
 
-class Person(models.Model):
+class Person(RandomSlugModel):
     conference = models.ForeignKey(Conference)
     name = models.CharField(max_length=70)
-    random_slug = models.CharField(max_length=64, editable=False)
     attending = models.BooleanField(default=True,
             help_text="Are you attending?")
     availability_start_date = models.DateTimeField(blank=True, null=True,
@@ -27,22 +64,16 @@ class Person(models.Model):
             help_text="When do you leave?")
     want_airport_pickup = models.BooleanField(default=False,
             help_text="Airport pickups might not be available.  But if we have capacity, would you like to get a ride?")
+    airport_pickup_date = models.DateTimeField(blank=True, null=True,
+            help_text="When do you arrive at the airport?")
     airport_pickup_details = models.TextField(blank=True,
             help_text="Please list your flight information.")
     want_airport_dropoff = models.BooleanField(default=False,
             help_text="Airport dropoffs might not be available.  But if we have capacity, would you like to get a ride?")
+    airport_dropoff_date = models.DateTimeField(blank=True, null=True,
+            help_text="When do you need to be at the airport? (e.g. one hour before flight departure)")
     airport_dropoff_details = models.TextField(blank=True,
             help_text="Please list your flight information.")
-
-    def set_random_slug(self):
-        self.random_slug = base64.urlsafe_b64encode(
-            os.urandom(32)
-        ).replace("=", "%3D")
-
-    def save(self, *args, **kwargs):
-        if not self.random_slug:
-            self.set_random_slug()
-        super(Person, self).save(*args, **kwargs)
 
     def __unicode__(self):
         return self.name
@@ -67,7 +98,7 @@ class Period(models.Model):
     def __unicode__(self):
         return self.period
 
-class Venue(models.Model):
+class Venue(RandomSlugModel):
     conference = models.ForeignKey(Conference)
     name = models.CharField(max_length=70)
 
@@ -76,6 +107,7 @@ class Venue(models.Model):
 
     class Meta:
         ordering = ['name']
+        unique_together = ['conference', 'name']
 
 class EventType(models.Model):
     conference = models.ForeignKey(Conference)
