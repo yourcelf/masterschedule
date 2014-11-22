@@ -10,7 +10,13 @@
   <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-  {% block nav %}{% include "schedule/_conference_nav.html" %}{% endblock %}
+  {% block nav %}
+    {% if conference %}
+      {% include "schedule/_conference_nav.html" %}
+    {% else %}
+      {% include "_main_nav.html" %}
+    {% endif %}
+  {% endblock %}
   {% block messages %}{% if messages %}
       <div class='container'>
         {% for message in messages %}
@@ -21,7 +27,11 @@
         {% endfor %}
       </div>
   {% endif %}{% endblock %}
-  {% block main %}{% endblock %}
+  {% block main %}
+    <div class='container'>
+      {% block content %}{% endblock %}
+    </div>
+  {% endblock %}
   <script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery-2.1.1.min.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery.color.js"></script>
   <script type="text/javascript" src="{{ STATIC_URL }}vendor/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>

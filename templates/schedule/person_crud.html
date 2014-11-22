@@ -69,9 +69,11 @@
         {{ person }} &ndash; 
         <a href='{% url "personal_schedule" conference.random_slug person.pk %}'>schedule</a>
         ({{ person.event_count }} events)
-        <button class='btn btn-xs delete-person' data-person-id='{{ person.id }}'>
-          <i class='glyphicon glyphicon-trash'></i>
-        </button>
+        {% if is_admin %}
+          <button class='btn btn-xs delete-person' data-person-id='{{ person.id }}'>
+            <i class='glyphicon glyphicon-trash'></i>
+          </button>
+        {% endif %}
       </li>
     {% endfor %}
   </ul>

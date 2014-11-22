@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
 
     'widget_tweaks',
+    'registration',
 
     'schedule',
 )
@@ -59,6 +60,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     "django.contrib.messages.context_processors.messages",
     "schedule.context_processors.base_url",
 )
+TEMPLATE_DIRS = [os.path.join(BASE_DIR, "templates")]
 
 ROOT_URLCONF = 'masterschedule.urls'
 

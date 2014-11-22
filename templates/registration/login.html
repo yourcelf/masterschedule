@@ -1,0 +1,27 @@
+{% extends "registration/registration_base.html" %}
+{% load i18n widget_tweaks %}
+{% block title %}{% trans "Login" %}{% endblock %}
+{% block content %}
+{% url 'auth_password_reset' as auth_pwd_reset_url %}
+{% url 'registration_register' as register_url%}
+
+
+<div class='col-md-6'>
+  <div class='col-sm-offset-4'>
+    <h1>Log in</h1>
+    {% if form.errors %}
+      <p>{% blocktrans %}Your username and password didn't match. Please try again.{% endblocktrans %}</p>
+    {% endif %}
+  </div>
+
+  <form method="post" action="{% url 'auth_login' %}" class='form-horizontal'>{% csrf_token %}
+    {% include "_bootstrap_form_horizontal.html" with wrap_form=0 submit='Log in'%}
+  <input type="hidden" name="next" value="{{ next }}" />
+  </form>
+  <div class='col-sm-offset-4'>
+    <p>{% blocktrans %}<a href="{{ auth_pwd_reset_url }}">Forgot</a> your password?
+        <a href="{{ register_url }}">Need an account</a>?{% endblocktrans %}</p>
+  </div>
+</div>
+
+{% endblock %}

@@ -25,14 +25,14 @@ def _admin_or_deny(user, conference):
     if auth_problems(user, conference):
         raise PermissionDenied
 
-def _problem_response(problems):
-    if problems['not authenticated']:
-        messages.info(
+def _problem_response(request, problems):
+    if 'not authenticated' in problems:
+        messages.info(request, 
             "You must log in as an admin of this conference to assign "
             "roles.")
         return redirect("auth_login")
-    elif problems['not admin']:
-        messages.info(
+    elif 'not admin' in problems:
+        messages.info(request, 
             "You must be an admin of this conference to assign roles. "
             "Please log in as an admin to continue.")
         return redirect("auth_login")
@@ -50,7 +50,7 @@ class ConferenceUpdate(UpdateView):
         conference = Conference.objects.get(random_slug=request.POST.slug)
         problems = auth_problems(request.user, conference)
         if problems:
-            return _problem_response(problems)
+            return _problem_response(request, problems)
         return super(ConferenceUpdate, self).dispatch(request, *args, **kwargs)
 
 class ConferenceList(ListView):
@@ -364,7 +364,7 @@ class EventAssigner(ListView):
         self.conference = get_object_or_404(Conference, random_slug=self.kwargs['slug'])
         problems = auth_problems(request.user, self.conference)
         if problems:
-            return _problem_response(problems)
+            return _problem_response(request, problems)
         return super(EventAssigner, self).dispatch(request, *args, **kwargs)
 
     def get_queryset(self):

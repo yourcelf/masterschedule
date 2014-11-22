@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Conferences{% endblock %}
+{% block content %}
+  <h1>Master Schedule</h1>
+  <p>
+  Easily create schedules for your next conference. 
+  </p>
+
+  <ul>
+    <li>Survey volunteer/staff availability and preferences</li>
+    <li>Build a schedule of events</li>
+    <li>Assign roles, considering availability and preferences</li>
+    <li>Assign rooms/venues</li>
+    <li>Build personal schedules. Integrates with iCal and printers.</li>
+    <li>Participants don't have to create accounts</li>
+    <li>Coordinate airport pickups and dropoffs</li>
+  </ul>
+  <p>
+  {% if user.is_authenticated %}
+    <a href='...' class='btn btn-primary'>Create a New Master Schedule</a>
+  {% else %}
+    Log in or register to create your first conference schedule. It's free.
+    <a class='btn btn-primary' href='{% url "registration_register" %}'>Register</a> or <a href='{% url "auth_login" %}'>log in</a>
+  {% endif %}
+  <h2>Latest master schedules</h2>
+  <ul>
+    {% for conference in object_list %}
+      <li><a href='{{ conference.get_absolute_url }}'>{{ conference }}</a></li>
+    {% endfor %}
+  </ul>
+{% endblock %}

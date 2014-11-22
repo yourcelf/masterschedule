@@ -1,0 +1,9 @@
+{% extends "registration/registration_base.html" %}
+{% load i18n %}
+{% block title %}{% trans "Activation email sent" %}{% endblock %}
+{% block content %}
+<p>
+  Welcome!  You can now <a class='btn btn-primary' href='...'>Create a new conference</a>, or view your <a href='{% url "my_conferences" %}'>existing ones</a>, if any.
+</p>
+{% endblock %}
+

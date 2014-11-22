@@ -1,0 +1,14 @@
+{% extends "_main_nav.html" %}
+
+{% block brand %}
+<a class="navbar-brand" href="/"><i class='glyphicon glyphicon-home'></i><span class='sr-only'>Home</span></a>
+  <a class="navbar-brand" href="{{ conference.get_absolute_url }}">{{ conference }}</a>
+{% endblock %}
+
+{% block navlinks %}
+  <li><a href='{% url "event_assigner" conference.random_slug %}'>Event assigner (admin)</a></li>
+  <li><a href='{% url "person_crud" conference.random_slug %}'>People</a></li>
+  <li><a href='{% url "venue_crud" conference.random_slug %}'>Venues</a></li>
+  <li><a href='{% url "roletype_crud" conference.random_slug %}'>Role Types</a></li>
+  <li><a href='{% url "airport_list" conference.random_slug %}'>Airport</a></li>
+{% endblock %}
