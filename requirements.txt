@@ -6,3 +6,4 @@ vobject
 qrcode
 pillow
 django-registration-redux
+django_compressor

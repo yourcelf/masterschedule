@@ -6,6 +6,8 @@ from django.db import models
 from django.db.models import Q
 from django.contrib.auth.models import User
 from django.core.urlresolvers import reverse
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 def random_slug():
     return base64.urlsafe_b64encode(os.urandom(32)).replace("=", "%3D")
@@ -34,13 +36,33 @@ class ConferenceManager(models.Manager):
     def active(self):
         return self.filter(archived=False)
 
+class ProspectiveAdmin(models.Model):
+    email = models.EmailField(max_length=255, unique=True)
+    def __unicode__(self):
+        return self.email
+
+@receiver(post_save)
+def convert_prospective_admins(sender, instance, created, raw, *args, **kwargs):
+    if created and not raw and isinstance(instance, User) and instance.email:
+        user = instance
+        try:
+            prospy = ProspectiveAdmin.objects.get(email=user.email)
+        except ProspectiveAdmin.DoesNotExist:
+            return
+        for conference in prospy.conference_set.all():
+            conference.admins.add(user)
+            conference.prospective_admins.remove(prospy)
+        prospy.delete()
+
 class Conference(RandomSlugModel):
     name = models.CharField(max_length=70)
     created = models.DateTimeField(auto_now_add=True, editable=False)
 
-    public = models.BooleanField(default=True)
+    public = models.BooleanField(default=True,
+            help_text="List this conference on the front page? Uncheck for more privacy.")
     archived = models.BooleanField(default=False)
     admins = models.ManyToManyField(User)
+    prospective_admins = models.ManyToManyField(ProspectiveAdmin, null=True, blank=True)
 
     objects = ConferenceManager()
 

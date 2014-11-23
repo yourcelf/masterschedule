@@ -17,7 +17,7 @@
   </ul>
   <p>
   {% if user.is_authenticated %}
-    <a href='...' class='btn btn-primary'>Create a New Master Schedule</a>
+    <a href='{% url "conference_create" %}' class='btn btn-primary'>Create a New Master Schedule</a>
   {% else %}
     Log in or register to create your first conference schedule. It's free.
     <a class='btn btn-primary' href='{% url "registration_register" %}'>Register</a> or <a href='{% url "auth_login" %}'>log in</a>

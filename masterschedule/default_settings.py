@@ -35,6 +35,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'compressor',
     'widget_tweaks',
     'registration',
 
@@ -95,6 +96,13 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, "collected_static")
+STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+    # other finders..
+    'compressor.finders.CompressorFinder',
+)
 
 # Base URL with protocol and domain, but no path.
 BASE_URL = "http://localhost:8000"

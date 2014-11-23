@@ -14,11 +14,12 @@ from schedule.views import (
         # Ajax
         EventRoleAjaxCrud, update_event_attribute,
         # Ajax: permission required
-        get_available_people, get_available_venues
+        get_available_people, get_available_venues, get_admin_data
     )
 
 urlpatterns = patterns('',
     url(r'^$', ConferenceList.as_view(), name='conferences'),
+    url(r'^admin-data$', get_admin_data, name='get_admin_data'),
     url(r'^schedule/(?P<slug>[^/]+)/$', MasterSchedule.as_view(), name='master_schedule'),
     url(r'^assign/(?P<slug>[^/]+)/$', EventAssigner.as_view(), name='event_assigner'),
     url(r'^venues/(?P<slug>[^/]+)/$', VenueCrud.as_view(), name='venue_crud'),

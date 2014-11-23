@@ -13,11 +13,11 @@ import vobject
 from schedule.models import *
 from schedule.forms import *
 
-def auth_problems(user, conference):
+def auth_problems(user, conference=None):
     p = {}
     if not user.is_authenticated():
         p['not authenticated'] = True
-    if not conference.is_admin(user):
+    if conference and not conference.is_admin(user):
         p['not admin'] = True
     return p
 
@@ -42,16 +42,39 @@ def _problem_response(request, problems):
 class ConferenceCreate(CreateView):
     model = Conference
     form_class = CreateConferenceForm
+    def dispatch(self, request, *args, **kwargs):
+        problems = auth_problems(request.user)
+        if problems:
+            return _problem_response(request, problems)
+        return super(ConferenceUpdate, self).dispatch(request, *args, **kwargs)
 
 class ConferenceUpdate(UpdateView):
     model = Conference
     form_class = UpdateConferenceForm
+
     def dispatch(self, request, *args, **kwargs):
-        conference = Conference.objects.get(random_slug=request.POST.slug)
-        problems = auth_problems(request.user, conference)
+        self.conference = Conference.objects.prefetch_related(
+                'admins', 'prospective_admins'
+            ).get(random_slug=self.kwargs.get('slug'))
+        problems = auth_problems(request.user, self.conference)
         if problems:
             return _problem_response(request, problems)
         return super(ConferenceUpdate, self).dispatch(request, *args, **kwargs)
+
+    def get_object(self):
+        return self.conference
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ConferenceUpdate, self).get_context_data(*args, **kwargs)
+        context['conference'] = self.conference
+        context["is_admin"] = self.conference.is_admin(self.request.user),
+        context['admins_json'] = json.dumps(
+            [{"id": a.id, "email": a.email, "exists": True}
+                for a in self.conference.admins.all()] + 
+            [{"id": a.id, "email": a.email, "exists": False}
+                for a in self.conference.prospective_admins.all()]
+        )
+        return context
 
 class ConferenceList(ListView):
     model = Conference
@@ -163,6 +186,7 @@ class MasterSchedule(DetailView):
 
         context["chunks"] = chunks
         context['ical_url'] = "{}{}?ical".format(settings.BASE_URL, self.request.path)
+        context['is_admin'] = context['conference'].is_admin(self.request.user)
         return context
 
 class PersonalSchedule(MasterSchedule):
@@ -355,6 +379,7 @@ class AirportDesires(ListView):
     def get_context_data(self, **kwargs):
         context = super(AirportDesires, self).get_context_data()
         context['conference'] = self.conference
+        context["is_admin"] = self.conference.is_admin(self.request.user),
         return context
 
 class EventAssigner(ListView):
@@ -552,6 +577,23 @@ def get_available_venues(request):
 
     res = json.dumps({"more": False, "results": results})
     return HttpResponse(res, content_type="application/json")
+
+def get_admin_data(request):
+    email = request.GET.get("email")
+    if email:
+        email = email.lower()
+        try:
+            user = User.objects.get(email=email)
+            res = json.dumps({"id": user.id, "email": user.email, "exists": True}) 
+        except User.DoesNotExist:
+            try:
+                user = ProspectiveAdmin.objects.get(email=email)
+                res = json.dumps({"id": user.id, "email": user.email, "exists": False}) 
+            except ProspectiveAdmin.DoesNotExist:
+                # Fake it -- id as email
+                res = json.dumps({"id": email, "email": email, "exists": False})
+        return HttpResponse(res, content_type="application/json")
+    return HttpResponseBadRequest("Missing 'email' query arg")
 
 class AvailabilitySurvey(UpdateView):
     model = Person

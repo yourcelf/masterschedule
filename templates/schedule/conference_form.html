@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+{% load firstof from future %}
+
+{% block title %}
+  {% if conference %}
+    Edit {{ conference }}
+  {% else %}
+    Create {{ conference }}
+  {% endif %}
+{% endblock %}
+
+{% block head %}
+  <script type='text/javascript'>
+    {% if admins_json %}
+      var currentAdmins = {{ admins_json|safe }};
+    {% else %}
+      var currentAdmins = [];
+    {% endif %}
+  </script>
+{% endblock %}
+
+{% block content %}
+  <div class='col-md-offset-2'>
+    <h1>{% if conference %}Edit {{ conference }}{% else %}Create conference{% endif %}</h1>
+  </div>
+  <form class='form-horizontal edit-conf' method='post' action=''>{% csrf_token %}
+    {% include "_bootstrap_form_horizontal.html" with wrap_form=0 label_class="col-sm-2" field_class="col-sm-10" %}
+    <div class='col-sm-offset-2'>
+      <p style='max-width: 40em; margin-bottom: 2em;'>
+        Anyone with the link will be able to view the full schedule (so be
+        careful when sharing it if you need privacy), but only the
+        <strong>admins</strong> listed here will be able to edit people,
+        venues, events, and assignments.
+      </p>
+    </div>
+    <div class='form-group'>
+      <label class='col-sm-2' style='text-align: right;'>Admins</label>
+      <div class='col-sm-10' data-role='admin-widget'></div>
+    </div>
+    <div class='col-sm-offset-2'>
+      <button type='submit' class='btn btn-primary'>Save</button>
+    </div>
+  </form>
+{% endblock %}
+
+{% block js %}
+<script type='text/template' id='admin-list-template'>
+  <div class='admin-list' data-role='admin-list'>
+  </div>
+  <div class='input-group col-md-6'>
+    <input type='text' class='form-control js-admin-email' placeholder='email@example.com'>
+    <div class='input-group-btn'>
+      <button type='button' class='js-add-admin btn btn-default'>
+        <i class='glyphicon glyphicon-plus'></i> Add
+      </button>
+    </div>
+  </div>
+</script>
+<script type='text/template' id='admin-row-template'>
+  <%= user.email %>
+  <% if (!user.exists) { %>
+    <span class='new-user-note'>Not registered yet &ndash;
+      <a href='mailto:<%= user.email %>?subject={% filter urlencode %}{% spaceless %}
+        Schedule our event
+      {% endspaceless %}{% endfilter %}&body={% filter urlencode %}{% spaceless %}
+        Please register at {{ BASE_URL }} to help plan our upcoming event.
+      {% endspaceless %}{% endfilter %}'>send invitation</a>
+    </span>
+  <% } %>
+  <a class='remove js-remove' href='#'>
+    <i class='glyphicon glyphicon-trash'></i>
+    <span class='sr-only'>Remove</span>
+    <span class='undo'>undo</span>
+  </a>
+</script>
+
+<script type='text/javascript'>
+  var AdminList = Backbone.View.extend({
+      template: _.template($("#admin-list-template").html()),
+      events: {
+        'click .js-add-admin': 'add',
+        'keydown .js-admin-email': 'addKey'
+      },
+      initialize: function(options) {
+        this.admins = options.admins;
+      },
+      render: function() {
+        this.$el.html(this.template());
+        _.each(this.admins, _.bind(this.renderItem, this));
+      },
+      renderItem: function(admin) {
+        if (admin.view) {
+          admin.view.remove();
+        }
+        admin.view = new AdminRow({admin: admin});
+        admin.view.render();
+        admin.view.on("change", _.bind(this.sync, this));
+        admin.view.on("remove", _.bind(function(admin) {
+          this.sync();
+          this.admins = _.reject(this.admins, function(a) {
+            return a.id === admin.id;
+          });
+        }, this));
+        this.$("[data-role='admin-list']").append(admin.view.el);
+      },
+      addKey: function(event) {
+        if ((event.keyCode || event.which || event.charCode) === 13) {
+          event.preventDefault();
+          this.add(event);
+        }
+      },
+      add: function(event) {
+        var input = this.$(".js-admin-email");
+        var holder = input.closest(".input-group");
+        holder.removeClass("has-error");
+        holder.find(".error-msg").remove();
+        var clear = function() { input.val(""); };
+        // Check for existing match.
+        var val = input.val();
+        if (!val) {
+          return;
+        }
+        if (!/^[^\s]+@[^\s]+$/.test(val)) {
+          holder.addClass("has-error");
+          holder.prepend("<div class='error-msg help-block'>Please use a valid email address.</div>");
+          return;
+        }
+        for (var i=0; i < this.admins.length; i++) {
+          if (val === this.admins[i].email) {
+            if (this.admins[i].removing) {
+              this.admins[i].removing = false;
+              this.admins[i].view.render();
+            }
+            this.admins[i].view.$el.animateHighlight();
+            clear();
+            return;
+          }
+        }
+        // No match found -- get a user from ajax.
+        $.get("{% url 'get_admin_data' %}", {email: val}, _.bind(function(data) {
+          data.unsaved = true;
+          this.admins.push(data);
+          this.renderItem(data);
+          clear();
+          this.sync();
+        }, this));
+      },
+      sync: function() {
+        // Create the hidden inputs necessary for our current list of admins.
+        var form = this.$el.closest("form");
+        _.each(this.admins, function(admin) {
+          var name = admin.exists ? "admins" : "prospective_admins";
+          var input = $("[name='" + name + "'][value='" + admin.id + "']");
+          if (admin.removing) {
+            input.remove();
+          } else {
+            if (input.length === 0) {
+              form.append(
+                "<input name='" + name + "' value='" + admin.id + "' type='hidden'>"
+              );
+            }
+          }
+        });
+      }
+  });
+
+  var AdminRow = Backbone.View.extend({
+      template: _.template($("#admin-row-template").html()),
+      events: {
+        "click .js-remove": "markRemoved"
+      },
+      initialize: function(options) {
+        this.user = options.admin;
+      },
+      render: function() {
+        this.$el.html(this.template({user: this.user}));
+        this.$el.addClass('admin-item');
+        this.$el.addClass(this.user.exists ? "existing-user" : "new-user");
+        if (this.user.removing) {
+          this.$el.addClass("removing");
+        }
+      },
+      markRemoved: function(event) {
+        event.preventDefault();
+        if (this.user.unsaved) {
+          this.user.removing = true;
+          this.trigger("remove", this.user);
+          this.remove();
+        }
+        this.user.removing = !this.user.removing;
+        this.$el.toggleClass("removing", this.user.removing);
+        this.trigger("change");
+      }
+  });
+
+  var widget = new AdminList({admins: currentAdmins});
+  widget.render();
+  $("[data-role='admin-widget']").html(widget.el);
+
+</script>
+
+{% endblock %}

@@ -49,6 +49,10 @@ class EventRoleInline(admin.TabularInline):
                 field.queryset = field.queryset.none()
         return field
 
+class ProspectiveAdminAdmin(admin.ModelAdmin):
+    search_fields = ['email']
+admin.site.register(ProspectiveAdmin, ProspectiveAdminAdmin)
+
 class EventAdmin(admin.ModelAdmin):
     list_display = ['title', 'type', 'period', 'start_date', 'end_date']
     list_filter = ['conference', 'type']

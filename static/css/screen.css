@@ -120,3 +120,18 @@ table.ea > tr > th {
       display: none;
   }
 }
+
+.edit-conf .admin-item {
+  padding: 0.5em;
+  border-bottom: 1px solid #eee;
+}
+.edit-conf .admin-item.existing-user { color: #030; }
+.edit-conf .admin-item.new-user { color: #666; }
+.edit-conf .admin-item.removing { color: #a42; text-decoration: line-through; }
+.edit-conf .admin-item .remove { float: right; }
+.edit-conf .admin-item .undo { display: none; font-style: italic; }
+.edit-conf .admin-item.removing .undo { display: inline; }
+.edit-conf .admin-item.removing i.glyphicon,
+.edit-conf .admin-item.removing span.sr-only { display: none; }
+.edit-conf .admin-item .new-user-note { font-style: italic; font-size: smaller; }
+

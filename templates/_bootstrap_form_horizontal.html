@@ -1,23 +1,37 @@
+{% load firstof from future %}
 {% load widget_tweaks schedule_form_fields %}
 {% if wrap_form != 0 %}
 <form class='form-horizontal' method='post' action='{{ action }}' role='form'>{% csrf_token %}
 {% endif %}
   {% if form.non_field_errors %}
     <div class='row form-group'>
-      <div class='col-sm-offset-4 col-sm-8 alert alert-warning'>
+      <div class='{% firstof label_class "col-sm-4" %}'></div>
+      <div class='{% firstof field_class "col-sm-8" %} alert alert-warning'>
         {{ form.non_field_errors }}
       </div>
     </div>
   {% endif %}
+  {# hidden field errors #}
+  {% for field in form %}
+    {% if field.is_hidden and field.errors %}
+      <div class='row form-group'>
+        <div class='{% firstof label_class "col-sm-4" %}'></div>
+        <div class='{% firstof field_class "col-sm-8" %} alert alert-warning'>
+          {{ field.errors }}
+        </div>
+      </div>
+    {% endif %}
+  {% endfor %}
+    
   {% for field in form %}
     {% if field.is_hidden %}
       {{ field }}
     {% else %}
       <div class='row form-group {% if field.errors %}has-error{% endif %} {% if field.required %}required{% endif %}'>
-        <label for='{{ field.id_for_label }}' class='col-sm-4 control-label' style='text-align: right;'>
+        <label for='{{ field.id_for_label }}' class='{% firstof label_class "col-sm-4" %} control-label' style='text-align: right;'>
           {% if field.field.required %}*{% endif %}{{ field.label }}
         </label>
-        <div class='col-sm-8'>
+        <div class='{% firstof field_class "col-sm-8" %}'>
           {% if field.errors %}
             <div class='alert alert-warning'>
               {{ field.errors }}

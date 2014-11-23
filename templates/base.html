@@ -1,4 +1,4 @@
-{% load schedule_tags %}
+{% load schedule_tags compress %}
 <!DOCTYPE html>
 <html>
 <head>
@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}vendor/select2-3.5.1/select2.css" />
   <link rel="stylesheet" href="{{ STATIC_URL }}css/screen.css" />
   <title>{% block title %}{% endblock %}</title>
+  {% block head %}{% endblock %}
 </head>
 <body>
   {% block nav %}
@@ -32,14 +33,17 @@
       {% block content %}{% endblock %}
     </div>
   {% endblock %}
-  <script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery-2.1.1.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery.color.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}vendor/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}vendor/moment.min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}vendor/Pikaday-master/pikaday.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}vendor/underscore-min.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}vendor/select2-3.5.1/select2.js"></script>
-  <script type="text/javascript" src="{{ STATIC_URL }}js/common.js"></script>
+  {% compress js %}
+    <script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery-2.1.1.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}vendor/jquery.color.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}vendor/bootstrap-3.2.0-dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}vendor/moment.min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}vendor/Pikaday-master/pikaday.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}vendor/underscore-min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}vendor/backbone-min.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}vendor/select2-3.5.1/select2.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/common.js"></script>
+  {% endcompress %}
   {% block js %}{% endblock %}
 </body>
 </htmL>
