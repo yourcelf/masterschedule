@@ -291,7 +291,7 @@ class VenueCrud(GenericView):
 
     def get(self, request, slug):
         conference = self._get_conference(slug)
-        _admin_or_deny(request.user, venue.conference)
+        _admin_or_deny(request.user, conference)
         form = VenueForm(request.POST or None)
         form.is_valid()
         return render(request, "schedule/venue_crud.html", {
