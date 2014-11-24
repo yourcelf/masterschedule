@@ -131,13 +131,6 @@ class Venue(RandomSlugModel):
         ordering = ['name']
         unique_together = ['conference', 'name']
 
-class EventType(models.Model):
-    conference = models.ForeignKey(Conference)
-    type = models.CharField(max_length=70)
-
-    def __unicode__(self):
-        return "{}: {}".format(self.conference, self.type)
-
 class Event(models.Model):
     guid = models.CharField(max_length=36, unique=True)
     conference = models.ForeignKey(Conference)
@@ -148,10 +141,7 @@ class Event(models.Model):
     period = models.ForeignKey(Period, blank=True, null=True,
             help_text="If set, will override start and end dates.")
 
-    type = models.ForeignKey(EventType, blank=True, null=True)
-
     description = models.TextField(blank=True)
-    url = models.URLField(blank=True, null=True)
 
     def save(self, *args, **kwargs):
         if not self.guid:

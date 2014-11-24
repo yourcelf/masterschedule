@@ -4,7 +4,7 @@
 <div class='container'>
   <h1>Events</h1>
   {% if perms.schedule.add_event %}
-    <a class='btn btn-primary' href='{% url "admin:schedule_event_add" %}'>Add event</a>
+    <a class='btn btn-primary' href='{% url "edit_event" conference.random_slug %}'>Add event</a>
   {% endif %}
   <table class='ea table table-condensed'>
     <tr>

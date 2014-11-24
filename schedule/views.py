@@ -259,12 +259,40 @@ class PrintAll(DetailView):
         context['people'].sort(key=lambda p: p['person'].name)
         return context
 
+def edit_event(request, slug):
+    conference = get_object_or_404(Conference.objects.active(), random_slug=slug)
+    _admin_or_deny(request.user, conference)
+    params = request.POST if request.method == "POST" else request.GET
+    event_id = params.get("id")
+    if event_id:
+        event = get_object_or_404(Event, pk=event_id)
+    else:
+        event = Event(conference=conference)
+    if request.POST.get("delete"):
+        event.delete()
+        messages.info(request, "Event deleted.")
+        return redirect("event_assigner")
+    form = EventForm(request.POST or None, instance=event)
+    if form.is_valid():
+        form.save()
+        message.sinfo(request, "Event saved.")
+        if request.POST.get("add_another"):
+            return redirect("edit_event")
+        return redirect("event_assigner")
+    return render(request, "schedule/edit_event.html", {
+        "conference": conference,
+        "event": event,
+        "form": form,
+        "is_admin": self.conference.is_admin(request.user)
+    })
+
 class VenueCrud(GenericView):
     def _get_conference(self, slug):
         return get_object_or_404(Conference.objects.active(), random_slug=slug)
 
     def get(self, request, slug):
         conference = self._get_conference(slug)
+        _admin_or_deny(request.user, venue.conference)
         form = VenueForm(request.POST or None)
         form.is_valid()
         return render(request, "schedule/venue_crud.html", {

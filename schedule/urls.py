@@ -6,7 +6,7 @@ from schedule.views import (
         RoomSchedule, PrintAll, AirportDesires,
         
         # Permission required
-        PersonCrud, VenueCrud, RoleTypeCrud, EventAssigner, ConferenceUpdate,
+        PersonCrud, VenueCrud, RoleTypeCrud, EventAssigner, ConferenceUpdate, edit_event,
 
         # Secret URL
         AvailabilitySurvey,
@@ -21,6 +21,7 @@ urlpatterns = patterns('',
     url(r'^$', ConferenceList.as_view(), name='conferences'),
     url(r'^admin-data$', get_admin_data, name='get_admin_data'),
     url(r'^schedule/(?P<slug>[^/]+)/$', MasterSchedule.as_view(), name='master_schedule'),
+    url(r'^event/(?P<slug>[^/]+)/$', edit_event, name='edit_event'),
     url(r'^assign/(?P<slug>[^/]+)/$', EventAssigner.as_view(), name='event_assigner'),
     url(r'^venues/(?P<slug>[^/]+)/$', VenueCrud.as_view(), name='venue_crud'),
     url(r'^people/(?P<slug>[^/]+)/$', PersonCrud.as_view(), name='person_crud'),

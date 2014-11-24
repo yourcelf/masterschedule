@@ -83,3 +83,31 @@ class RoleTypeForm(forms.ModelForm):
     class Meta:
         model = RoleType
         fields = ['role']
+
+class EventForm(forms.ModelForm):
+    add_period = models.BooleanField()
+    period_name = models.CharField()
+    class Meta:
+        model = Event
+        fields = ['title', 'venue', 'start_date', 'end_date', 'period', 'description']
+
+    def clean_period_name(self):
+        if self.cleaned_data['add_period']:
+            raise ValidationError("Period name is required to add a period.")
+        if Period.objects.filter(period=self.cleaned_data['period_name'], 
+                conference=self.instance.conference).exists():
+            raise ValidationError("That name is already in use.")
+        return self.cleaned_data
+
+    def save(self):
+        event = super(EventForm, self).save(commit=False)
+        if self.cleaned_data['add_period']:
+            event.period = Period.objects.create(
+                conference=self.instance.conference, 
+                period=self.cleaned_data['period_name'],
+                start_date=event.start_date,
+                end_date=event.end_date)
+            event.save()
+        return event
+
+

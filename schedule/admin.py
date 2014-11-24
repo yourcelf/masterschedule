@@ -28,11 +28,6 @@ class VenueAdmin(admin.ModelAdmin):
     list_filter = ['conference']
 admin.site.register(Venue, VenueAdmin)
 
-class EventTypeAdmin(admin.ModelAdmin):
-    list_display = ['type', 'conference']
-    list_filter = ['conference']
-admin.site.register(EventType, EventTypeAdmin)
-
 class RoleTypeAdmin(admin.ModelAdmin):
     list_display = ['role', 'conference']
     list_filter = ['conference']
@@ -54,8 +49,8 @@ class ProspectiveAdminAdmin(admin.ModelAdmin):
 admin.site.register(ProspectiveAdmin, ProspectiveAdminAdmin)
 
 class EventAdmin(admin.ModelAdmin):
-    list_display = ['title', 'type', 'period', 'start_date', 'end_date']
-    list_filter = ['conference', 'type']
+    list_display = ['title', 'period', 'start_date', 'end_date']
+    list_filter = ['conference']
     inlines = [EventRoleInline]
     def get_form(self, request, obj=None, **kwargs):
         request._obj_ = obj

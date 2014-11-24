@@ -7,7 +7,7 @@
       {{ event.start_date|date:"D "}}{{ event.start_date|date:"fA"|lower}}&ndash;{{ event.end_date|date:"fA"|lower}}
     {% endif %}
   </td>
-  <td class='title'>{{ event.title }}</td>
+  <td class='title'>{{ event.title }} <a class='btn btn-default btn-small href='{% url "edit_event" conference.random_slug %}?id={{ event.pk }}'>Edit</a></td>
   <td class='roles'>
       <a class='btn btn-default btn-xs add-event-role'
         href='#' data-event-id='{{ event.pk }}'>
