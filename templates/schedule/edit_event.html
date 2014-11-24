@@ -1,12 +1,61 @@
 {% extends "base.html" %}
 {% block title %}
-  {% if event %}Edit {{ event }} {% else %}Add Event{% endif %}
+  {% if event.id %}Edit "{{ event }}" {% else %}Add Event{% endif %}
 {% endblock %}
 
 {% block content %}
+<div class='col-md-6'>
   <div class='col-sm-offset-4'>
-    <h1>{% if event %}Edit {{ event }}{% else %}Add Event{% endif %}</h1>
+    <h1>{% if event.id %}Edit &ldquo;{{ event }}&rdquo;{% else %}Add Event{% endif %}</h1>
   </div>
-  {% include "_bootstrap_form_horizontal.html" %}
+  <form method='post' action='' class='form-horizontal'>{% csrf_token %}
+    {% include "_bootstrap_form_horizontal_non_field_errors.html" %}
+    {% include "_bootstrap_form_horizontal_field.html" with field=form.title %}
+    {% include "_bootstrap_form_horizontal_field.html" with field=form.venue %}
+    <div class='date-elements'>
+      {% include "_bootstrap_form_horizontal_field.html" with field=form.start_date %}
+      {% include "_bootstrap_form_horizontal_field.html" with field=form.end_date %}
+    </div>
+    {% include "_bootstrap_form_horizontal_field.html" with field=form.period %}
 
+    <div class='add-period-elements'>
+      {% include "_bootstrap_form_horizontal_field.html" with field=form.add_period %}
+      <div class='period-name-elements'>
+        {% include "_bootstrap_form_horizontal_field.html" with field=form.period_name %}
+      </diV>
+    </div>
+
+    {% include "_bootstrap_form_horizontal_field.html" with field=form.description %}
+    <div class='col-sm-4'>
+      {% if event.id %}
+        <button type='submit' class='btn btn-danger' name='delete' value='1'>
+          Delete event
+        </button>
+      {% endif %}
+    </div>
+    <div class='col-sm-8'>
+      <button type='submit' class='btn btn-primary' name='save' value='1'>
+        Save event
+      </button>
+      <button type='submit' class='btn btn-default' name='add_another' value='1'>
+        Save and add another
+      </button>
+    </div>
+  </form>
+</div>
+<div style='clear: both; margin-bottom: 2em;'></div>
+
+{% endblock %}
+{% block js %}
+<script type='text/javascript'>
+  $("#id_period").on("change", function() {
+    $(".add-period-elements").toggle($("#id_period").val() === "");
+  }).change();
+  $("#id_add_period").on("change", function() {
+    $(".period-name-elements").toggle($("#id_add_period").is(":checked"));
+  }).change();
+  $("#id_period").on("change", function() {
+    $(".date-elements").toggle($("#id_period").val() === "");
+  }).change();
+</script>
 {% endblock %}

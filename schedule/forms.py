@@ -85,19 +85,21 @@ class RoleTypeForm(forms.ModelForm):
         fields = ['role']
 
 class EventForm(forms.ModelForm):
-    add_period = models.BooleanField()
-    period_name = models.CharField()
+    add_period = forms.BooleanField(required=False,
+        label="Add new period",
+        help_text='Add these start and end dates as a new "period" (e.g. a course block, track, etc)?')
+    period_name = forms.CharField(required=False)
     class Meta:
         model = Event
         fields = ['title', 'venue', 'start_date', 'end_date', 'period', 'description']
 
     def clean_period_name(self):
-        if self.cleaned_data['add_period']:
+        if self.cleaned_data['add_period'] and not self.cleaned_data.get('period_name'):
             raise ValidationError("Period name is required to add a period.")
         if Period.objects.filter(period=self.cleaned_data['period_name'], 
                 conference=self.instance.conference).exists():
             raise ValidationError("That name is already in use.")
-        return self.cleaned_data
+        return self.cleaned_data['period_name']
 
     def save(self):
         event = super(EventForm, self).save(commit=False)
@@ -107,7 +109,7 @@ class EventForm(forms.ModelForm):
                 period=self.cleaned_data['period_name'],
                 start_date=event.start_date,
                 end_date=event.end_date)
-            event.save()
+        event.save()
         return event
 
 

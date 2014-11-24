@@ -262,8 +262,7 @@ class PrintAll(DetailView):
 def edit_event(request, slug):
     conference = get_object_or_404(Conference.objects.active(), random_slug=slug)
     _admin_or_deny(request.user, conference)
-    params = request.POST if request.method == "POST" else request.GET
-    event_id = params.get("id")
+    event_id = request.GET.get("id")
     if event_id:
         event = get_object_or_404(Event, pk=event_id)
     else:
@@ -271,19 +270,19 @@ def edit_event(request, slug):
     if request.POST.get("delete"):
         event.delete()
         messages.info(request, "Event deleted.")
-        return redirect("event_assigner")
+        return redirect("event_assigner", conference.random_slug)
     form = EventForm(request.POST or None, instance=event)
     if form.is_valid():
         form.save()
-        message.sinfo(request, "Event saved.")
+        messages.info(request, "Event saved.")
         if request.POST.get("add_another"):
-            return redirect("edit_event")
-        return redirect("event_assigner")
+            return redirect("edit_event", conference.random_slug)
+        return redirect("event_assigner", conference.random_slug)
     return render(request, "schedule/edit_event.html", {
         "conference": conference,
         "event": event,
         "form": form,
-        "is_admin": self.conference.is_admin(request.user)
+        "is_admin": conference.is_admin(request.user)
     })
 
 class VenueCrud(GenericView):

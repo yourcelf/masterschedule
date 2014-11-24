@@ -20,7 +20,10 @@ def _parse_date(field):
     if not val:
         return None
     elif isinstance(val, basestring):
-        val = datetime.datetime.strptime(val, "%Y-%m-%dT%H:%M:%S")
+        try:
+            val = datetime.datetime.strptime(val, "%Y-%m-%dT%H:%M:%S")
+        except ValueError:
+            val = datetime.datetime.strptime(val, "%Y-%m-%d %H:%M:%S")
     return val
 
 
