@@ -8,3 +8,4 @@ settings.py
 fabfile.py
 db.sqlite3
 venv
+collected_static
