@@ -1,4 +1,4 @@
-= Master Schedule
+# Master Schedule
 
 Master Schedule is a free, open source Django application for coordinating
 volunteer and event schedules for large-scale, multi-day conferences. You can
@@ -11,7 +11,7 @@ use it to:
 
 Running on the web at https://masterschedule.tirl.org.
 
-== License
+## License
 
 Copyright (c) 2014 Charlie DeTar
 
