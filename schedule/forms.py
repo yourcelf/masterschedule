@@ -91,7 +91,7 @@ class EventForm(forms.ModelForm):
     period_name = forms.CharField(required=False)
     class Meta:
         model = Event
-        fields = ['title', 'venue', 'start_date', 'end_date', 'period', 'description']
+        fields = ['title', 'start_date', 'end_date', 'period', 'description']
 
     def clean_period_name(self):
         if self.cleaned_data['add_period'] and not self.cleaned_data.get('period_name'):

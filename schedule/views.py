@@ -42,11 +42,19 @@ def _problem_response(request, problems):
 class ConferenceCreate(CreateView):
     model = Conference
     form_class = CreateConferenceForm
+
     def dispatch(self, request, *args, **kwargs):
         problems = auth_problems(request.user)
         if problems:
             return _problem_response(request, problems)
-        return super(ConferenceUpdate, self).dispatch(request, *args, **kwargs)
+        return super(ConferenceCreate, self).dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, *args, **kwargs):
+        context = super(ConferenceCreate, self).get_context_data(*args, **kwargs)
+        context['admins_json'] = json.dumps([{
+            "id": self.request.user.id, "email": self.request.user.email, "exists": True
+        }])
+        return context
 
 class ConferenceUpdate(UpdateView):
     model = Conference

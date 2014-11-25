@@ -33,6 +33,7 @@ INSTALLED_APPS = (
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.sites',
     'django.contrib.staticfiles',
 
     'compressor',
@@ -106,3 +107,5 @@ STATICFILES_FINDERS = (
 
 # Base URL with protocol and domain, but no path.
 BASE_URL = "http://localhost:8000"
+SITE_ID = 1
+ACCOUNT_ACTIVATION_DAYS = 2

@@ -10,19 +10,37 @@
   {% for person in object_list %}
     {% if person.want_airport_pickup %}
     <li>
-    <b>{{ person }}</b> <small>(availability: {{ person.availability_start_date|date:"D fA" }} - {{ person.availability_end_date|date:"D fA" }})</small>
+    <b>{{ person }}</b>
+      {% if person.airport_pickup_date %}
+        <small>(pick up: {{ person.airport_pickup_date|date:"D fA" }}</small>
+      {% elif person.availability_start_date %}
+        <small>(no pick up date given &ndash; availability start: {{ person.availability_start_date|date:"D fA" }})</small>
+      {% endif %}
       <div style='white-space: pre-wrap'>{{ person.airport_pickup_details }}</div>
     </li>
     {% endif %}
+  {% empty %}
+    <li>None requested</li>
   {% endfor %}
+  </ul>
   <h3>Dropoffs</h3>
+  <ul>
   {% for person in object_list %}
     {% if person.want_airport_dropoff %}
     <li>
-      <b>{{ person }}</b> <small>(availability: {{ person.availability_start_date|date:"D fA" }} - {{ person.availability_end_date|date:"D fA" }})</small>
+      <b>{{ person }}</b>
+      {% if person.airport_dropoff_date %}
+        <small>(pick up: {{ person.airport_dropoff_date|date:"D fA" }}</small>
+      {% elif person.availability_end_date %}
+        <small>(no drop off date given &ndash; availability end: {{ person.availability_end_date|date:"D fA" }})</small>
+      {% endif %}
+
       <div style='white-space: pre-wrap'>{{ person.airport_dropoff_details }}</div>
     </li>
     {% endif %}
+  {% empty %}
+    <li>None requested</li>
   {% endfor %}
+  </ul>
 </div>
 {% endblock %}

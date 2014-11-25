@@ -5,6 +5,30 @@
 
 {% block main %}
 
+{% if not chunks %}
+  <div class='container'>
+    <div class='col-sm-6 col-sm-offset-3'>
+      {% if is_admin %}
+        <div class='alert alert-info'>
+          Master Schedule created!
+        </div>
+        <p><b>How this works</b>:
+        <ol>
+          <li>Add volunteers and staff to the <a href='{% url "person_crud" conference.random_slug %}'>list of people</a> attending your event.  From there, you can find personalized links for surveys for each person, so that they can tell you about their availability during the conference.</li>
+          <li>Next, <a href='{% url "edit_event" conference.random_slug %}'>add events</a> to the schedule.</li>
+          <li>Finally, assign roles and venues to the events with the <a href='{% url "event_assigner" conference.random_slug %}'>event assigner</a>. This will build the personalized schedule for each person, as well as the master schedule here.</li>
+        </ol>
+        {% if conference.people.exists %}
+          Next: <a class='btn btn-primary' href='{% url "edit_event" conference.random_slug %}'>Add Events</a>
+        {% else %}
+          First step: <a class='btn btn-primary' href='{% url "person_crud" conference.random_slug %}'>Add People</a>
+        {% endif %}
+      {% else %}
+        The schedule will show up here when the admins have created it.
+      {% endif %}
+    </div>
+  </div>
+{% else %}
 <div class='ms-page'>
   <h1>{% firstof filter "Master Schedule" %} <small><a href='?flat'>Flat view for printing</a></small> <a href='?ical'><img src='{{ STATIC_URL }}img/ical.gif' alt='ical format' /></a></h1>
 
@@ -82,6 +106,7 @@
     <div style='clear: both;'></div>
   </div>
 </div>
+{% endif %}
   
 {% endblock %}
 

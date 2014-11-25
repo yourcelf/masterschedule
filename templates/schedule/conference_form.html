@@ -21,7 +21,7 @@
 
 {% block content %}
   <div class='col-md-offset-2'>
-    <h1>{% if conference %}Edit {{ conference }}{% else %}Create conference{% endif %}</h1>
+    <h1>{% if conference %}Edit &ldquo;{{ conference }}&rdquo;{% else %}Create conference{% endif %}</h1>
   </div>
   <form class='form-horizontal edit-conf' method='post' action=''>{% csrf_token %}
     {% include "_bootstrap_form_horizontal.html" with wrap_form=0 label_class="col-sm-2" field_class="col-sm-10" %}
@@ -196,6 +196,7 @@
   var widget = new AdminList({admins: currentAdmins});
   widget.render();
   $("[data-role='admin-widget']").html(widget.el);
+  widget.sync();
 
 </script>
 

@@ -11,7 +11,6 @@
   <form method='post' action='' class='form-horizontal'>{% csrf_token %}
     {% include "_bootstrap_form_horizontal_non_field_errors.html" %}
     {% include "_bootstrap_form_horizontal_field.html" with field=form.title %}
-    {% include "_bootstrap_form_horizontal_field.html" with field=form.venue %}
     <div class='date-elements'>
       {% include "_bootstrap_form_horizontal_field.html" with field=form.start_date %}
       {% include "_bootstrap_form_horizontal_field.html" with field=form.end_date %}
@@ -42,6 +41,17 @@
       </button>
     </div>
   </form>
+</div>
+<div class='col-md-6'>
+  <div class='alert alert-warning'>
+    <h2>Tips</h2>
+    <ul>
+      <li><b>Events</b> are moments in time and space that need to go on a schedule &ndash; including courses, sessions, plenaries, meals, etc.  In the <a href='{% url "event_assigner" conference.random_slug %}'>event assigner</a>, you can assign <b>roles</b> and <b>venues</b> to events.
+      <li><b>Periods</b> are blocks of time that are shared by many events &ndash; like a "course block".  Use them as a shortcut to get the same start and end dates for several events.</li>
+      <li><b>Roles</b> are volunteer or staff assignments like "Presenter", "A/V support", "Cleanup", etc.  Use roles in the <a href='{% url "event_assigner" conference.random_slug %}'>event assigner</a> to ask people to show up at a particular place and time.
+      <li><b>Venues</b> are where events happen &ndash; like rooms, buildings, or addresses. <a href='{% url "venue_crud" conference.random_slug %}'>Edit venues</a>.
+    </ul>
+  </div>
 </div>
 <div style='clear: both; margin-bottom: 2em;'></div>
 

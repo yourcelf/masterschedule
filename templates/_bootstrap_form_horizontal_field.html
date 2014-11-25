@@ -6,6 +6,7 @@
     <div class='row form-group'>
       <div class='{% firstof label_class "col-sm-4" %}'></div>
       <div class='{% firstof field_class "col-sm-8" %} alert alert-warning'>
+        {{ field.label }}:
         {{ field.errors }}
       </div>
     </div>
@@ -36,19 +37,21 @@
             <input type='hidden' value='{{ field.value|date:"Y-m-d H:i:s" }}' name='{{ field.html_name }}' data-role='date-time' />
             <input type='date' value='{{ field.value|date:"Y-m-d" }}'
                    class='calendar-widget' data-role='date' />
-            <select data-role='hours'>
-              {% for val,selected in field|hours_for_field %}
-                <option value='{{ val }}' {% if selected %}selected="selected"{% endif %}>{{ val }}</option>
-              {% endfor %}
-            </select>:<select data-role='minutes'>
-              {% for val,selected in field|minutes_for_field %}
-                <option value='{{ val }}' {% if selected %}selected="selected"{% endif %}>{{ val }}</option>
-              {% endfor %}
-            </select><select data-role='ampm'>
-              {% for val,selected in field|ampm_for_field %}
-                <option value='{{ val }}' {% if selected %}selected="selected"{% endif %}>{{ val }}</option>
-              {% endfor %}
-            </select>
+            <nobr>
+              <select data-role='hours'>
+                {% for val,selected in field|hours_for_field %}
+                  <option value='{{ val }}' {% if selected %}selected="selected"{% endif %}>{{ val }}</option>
+                {% endfor %}
+              </select>:<select data-role='minutes'>
+                {% for val,selected in field|minutes_for_field %}
+                  <option value='{{ val }}' {% if selected %}selected="selected"{% endif %}>{{ val }}</option>
+                {% endfor %}
+              </select><select data-role='ampm'>
+                {% for val,selected in field|ampm_for_field %}
+                  <option value='{{ val }}' {% if selected %}selected="selected"{% endif %}>{{ val }}</option>
+                {% endfor %}
+              </select>
+            </nobr>
           </div>
         {% else %}
           {% render_field field class+="form-control" placeholder=field.label %}

@@ -7,7 +7,7 @@
 
 {% block navlinks %}
   {% if is_admin %}
-    <li><a href="{% url "conference_update" conference.random_slug %}">Edit</a></li>
+    <li><a href="{% url "conference_update" conference.random_slug %}"><i class='glyphicon glyphicon-cog'></i><span class='sr-only'>Edit conference</span></a></li>
     <li><a href='{% url "event_assigner" conference.random_slug %}'>Event assigner</a></li>
   {% endif %}
   <li><a href='{% url "person_crud" conference.random_slug %}'>People</a></li>

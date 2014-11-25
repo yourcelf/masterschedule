@@ -8,7 +8,7 @@ and your address will be removed from our records.
 To activate this account, please click the following link within the next 
 {{ expiration_days }} days:
 
-http://{{ siteurl }}{{ activation_key_url }}
+https://{{ siteurl }}{{ activation_key_url }}
 
 Sincerely,
 {{ sitename }} Management

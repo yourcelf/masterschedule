@@ -60,7 +60,8 @@ class Conference(RandomSlugModel):
 
     public = models.BooleanField(default=True,
             help_text="List this conference on the front page? Uncheck for more privacy.")
-    archived = models.BooleanField(default=False)
+    archived = models.BooleanField(default=False,
+            help_text="Remove this conference from your list?")
     admins = models.ManyToManyField(User)
     prospective_admins = models.ManyToManyField(ProspectiveAdmin, null=True, blank=True)
 
