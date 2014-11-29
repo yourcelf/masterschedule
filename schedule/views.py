@@ -636,7 +636,7 @@ class AvailabilitySurvey(UpdateView):
     template_name = "schedule/availability.html"
 
     def get_object(self):
-        return Person.objects.get(random_slug=self.kwargs['slug'])
+        return get_object_or_404(Person, random_slug=self.kwargs['slug'])
 
     def get_context_data(self, **kwargs):
         context = super(AvailabilitySurvey, self).get_context_data(**kwargs)
