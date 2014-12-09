@@ -16,4 +16,4 @@ class Command(BaseCommand):
             urls.append(reverse("personal_schedule", args=[conference.random_slug, person.pk]))
             urls.append(reverse("availability_survey", args=[person.random_slug]))
         for url in urls:
-            print "https://masterschedule.tirl.org" + url
+            print url
