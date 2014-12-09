@@ -9,6 +9,9 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}css/screen.css" />
   <title>{% block title %}{% endblock %}</title>
   {% block head %}{% endblock %}
+  {% if conference and not conference.public %}
+    <meta name="robots" content="noindex">
+  {% endif %}
 </head>
 <body>
   {% block nav %}
