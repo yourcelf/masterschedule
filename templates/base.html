@@ -9,7 +9,8 @@
   <link rel="stylesheet" href="{{ STATIC_URL }}css/screen.css" />
   <title>{% block title %}{% endblock %}</title>
   {% block head %}{% endblock %}
-  {% if conference and not conference.public %}
+  {% if conference %}
+    <!-- tell Google not to index any conference pages ever. -->
     <meta name="robots" content="noindex">
   {% endif %}
 </head>
