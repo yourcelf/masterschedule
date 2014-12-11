@@ -1,0 +1,17 @@
+User-agent: *
+Disallow: /admin-data
+Disallow: /schedule/
+Disallow: /event/
+Disallow: /assign/
+Disallow: /venues/
+Disallow: /people/
+Disallow: /roletypes/
+Disallow: /airport/
+Disallow: /printall/
+Disallow: /survey/
+Disallow: /personal/
+Disallow: /room/
+Disallow: /create-conference/
+Disallow: /update-conference/
+Disallow: /admin/
+Disallow: /accounts/
