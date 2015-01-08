@@ -4,6 +4,8 @@ from django.core import mail
 from django.core.urlresolvers import reverse
 from django.contrib.auth.models import User
 
+from schedule.models import Conference, Person
+
 class TestCreateConference(TestCase):
     def test_sign_up_to_event_creation(self):
         self.assertFalse(User.objects.filter(username="test").exists())
@@ -52,3 +54,24 @@ class TestCreateConference(TestCase):
         
         res = c.get(reverse("conference_create"))
         self.assertEquals(res.status_code, 200)
+
+class TestAvailabilityPrefs(TestCase):
+    def test_add_availability_prefs(self):
+        conference = Conference.objects.create(name="Test Conference", public=False)
+        person = Person.objects.create(name="Charlie", conference=conference)
+
+        c = Client()
+        url = reverse("availability_survey", args=[person.random_slug]).replace("%3D", "=")
+        res = c.get(url)
+        self.assertContains(res, "Charlie availability")
+        res = c.post(url, {
+            "name": "Charlie",
+            "attending": True,
+            "availability_start_date": "2015-01-08 08:00:00",
+            "availability_end_date": "2015-01-09 08:00:00",
+            "othercommitment_set-TOTAL_FORMS": "2",
+            "othercommitment_set-INITIAL_FORMS": "0",
+            "othercommitment_set-MIN_NUM_FORMS": "0",
+            "othercommitment_set-MAX_NUM_FORMS": "1000",
+        })
+        self.assertRedirects(res, url)

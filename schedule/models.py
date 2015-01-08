@@ -10,7 +10,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 def random_slug():
-    return base64.urlsafe_b64encode(os.urandom(32)).replace("=", "%3D")
+    return base64.urlsafe_b64encode(os.urandom(32))
 
 class RandomSlugModel(models.Model):
     random_slug = models.CharField(max_length=64, editable=False, unique=True)
