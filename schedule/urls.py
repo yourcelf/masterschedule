@@ -18,6 +18,13 @@ from schedule.views import (
     )
 
 urlpatterns = patterns('',
+    # AJAX methods for altering events.
+    url(r'^event/edit-role/', EventRoleAjaxCrud.as_view(), name='event_role_crud'),
+    url(r'^event/available-people/', get_available_people, name='get_available_people'),
+    url(r'^event/update-event-attribute/', update_event_attribute, name='update_event_attribute'),
+
+    #
+    url(r'^event/available-venues/', get_available_venues, name='get_available_venues'),
     url(r'^$', ConferenceList.as_view(), name='conferences'),
     url(r'^admin-data$', get_admin_data, name='get_admin_data'),
     url(r'^schedule/(?P<slug>[^/]+)/$', MasterSchedule.as_view(), name='master_schedule'),
@@ -34,10 +41,4 @@ urlpatterns = patterns('',
     url(r'^create-conference/', ConferenceCreate.as_view(), name='conference_create'),
     url(r'^update-conference/(?P<slug>[^/]+)/$', ConferenceUpdate.as_view(),
         name='conference_update'),
-
-    # AJAX methods for altering events.
-    url(r'^event/edit-role/', EventRoleAjaxCrud.as_view(), name='event_role_crud'),
-    url(r'^event/available-people/', get_available_people, name='get_available_people'),
-    url(r'^event/update-event-attribute/', update_event_attribute, name='update_event_attribute'),
-    url(r'^event/available-venues/', get_available_venues, name='get_available_venues'),
 )

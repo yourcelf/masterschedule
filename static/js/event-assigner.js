@@ -77,8 +77,8 @@ function showAddEventRoleForm(event) {
     var val = $(roleEvent.currentTarget).val();
     personSelect.select2("destroy");
     personSelect.hide();
-    personHolder.addClass("loading");
     if (val) {
+      personHolder.show().addClass("loading");
       var data = {
         roleTypeId: val,
         eventId: formData.eventId,
@@ -95,6 +95,8 @@ function showAddEventRoleForm(event) {
           allowClear: true
         });
       });
+    } else {
+      personHolder.hide();
     }
   }).change();
 
