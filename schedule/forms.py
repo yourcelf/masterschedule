@@ -89,6 +89,15 @@ class EventForm(forms.ModelForm):
         label="Add new period",
         help_text='Add these start and end dates as a new "period" (e.g. a course block, track, etc)?')
     period_name = forms.CharField(required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(EventForm, self).__init__(*args, **kwargs)
+        instance = kwargs.get('instance', None)
+        if instance is None:
+            self.fields['period'].queryset = Period.objects.none()
+        else:
+            self.fields['period'].queryset = instance.conference.period_set.all()
+
     class Meta:
         model = Event
         fields = ['title', 'start_date', 'end_date', 'period', 'description']
