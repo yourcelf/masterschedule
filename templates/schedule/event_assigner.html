@@ -3,7 +3,7 @@
 {% block main %}
 <div class='container'>
   <h1>Events</h1>
-  {% if perms.schedule.add_event %}
+  {% if is_admin %}
     <a class='btn btn-primary' href='{% url "edit_event" conference.random_slug %}'>Add event</a>
   {% endif %}
   <table class='ea table table-condensed'>
