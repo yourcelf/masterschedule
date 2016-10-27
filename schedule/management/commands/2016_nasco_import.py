@@ -56,19 +56,25 @@ class Command(BaseCommand):
         )
 
         for course in courses:
-            period = Period.objects.get_or_create(
+            period, created = Period.objects.get_or_create(
                 conference=conference,
                 period=course['Period'],
-            )[0]
+            )
             period.start_date = BLOCKS[course['Period']][0]
             period.end_date = BLOCKS[course['Period']][1]
             period.save()
 
+            venue, created = Venue.objects.get_or_create(
+                conference=conference,
+                name=course['Room']
+            )
+
             event, created = Event.objects.get_or_create(
                 conference=conference,
                 title=course['Session Title'],
-                period=period,
             )
+            event.period = period
+            event.venue = venue
             event.save()
 
             names = course.get('Presenter', '').split(";")
