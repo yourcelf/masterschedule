@@ -71,8 +71,8 @@ class Command(BaseCommand):
             )
             event.save()
 
-            names = course.get('Presenters', '').split("; ")
-            people = [Person.objects.get_or_create(name=n, conference=conference)[0] for n in names]
+            names = course.get('Presenter', '').split(";")
+            people = [Person.objects.get_or_create(name=n.strip(), conference=conference)[0] for n in names]
             for person in people:
                 EventRole.objects.get_or_create(
                         event=event,
