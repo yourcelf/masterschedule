@@ -14,8 +14,7 @@ def parse_date(datestr, timestr):
     naive = datetime.datetime.strptime(
             datestr + " " + timestr, "%m/%d/%y %I:%M:%S %p"
     )
-    return datetime.datetime(naive.year, naive.month, naive.day,
-            naive.hour, naive.minute, naive.second, 0, tz)
+    return tz.localize(naive)
 
 class Command(BaseCommand):
     def add_argument(self, parser):
@@ -60,15 +59,18 @@ class Command(BaseCommand):
             period = Period.objects.get_or_create(
                 conference=conference,
                 period=course['Period'],
-                start_date=BLOCKS[course['Period']][0],
-                end_date=BLOCKS[course['Period']][1],
             )[0]
+            period.start_date = BLOCKS[course['Period']][0]
+            period.end_date = BLOCKS[course['Period']][1]
+            period.save()
 
             event, created = Event.objects.get_or_create(
                 conference=conference,
                 title=course['Session Title'],
                 period=period,
             )
+            event.save()
+
             names = course.get('Presenters', '').split("; ")
             people = [Person.objects.get_or_create(name=n, conference=conference)[0] for n in names]
             for person in people:
