@@ -56,10 +56,16 @@ class Command(BaseCommand):
         )
 
         for course in courses:
-            period, created = Period.objects.get_or_create(
-                conference=conference,
-                period=course['Period'],
-            )
+            try:
+                period = Period.objects.get(
+                    conference=conference,
+                    period=course['Period']
+                )
+            except Period.DoesNotExist:
+                period = Period(
+                    conference=conference,
+                    period=course['Period']
+                )
             period.start_date = BLOCKS[course['Period']][0]
             period.end_date = BLOCKS[course['Period']][1]
             period.save()
