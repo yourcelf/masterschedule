@@ -98,10 +98,6 @@ class EventForm(forms.ModelForm):
         else:
             self.fields['period'].queryset = instance.conference.period_set.all()
 
-    class Meta:
-        model = Event
-        fields = ['title', 'start_date', 'end_date', 'period', 'description']
-
     def clean_period_name(self):
         if self.cleaned_data['add_period'] and not self.cleaned_data.get('period_name'):
             raise ValidationError("Period name is required to add a period.")
@@ -109,6 +105,12 @@ class EventForm(forms.ModelForm):
                 conference=self.instance.conference).exists():
             raise ValidationError("That name is already in use.")
         return self.cleaned_data['period_name']
+
+    def clean(self):
+        data = super(EventForm, self).clean()
+        if not (data['start_date'] or data['period']):
+            raise ValidationError("One of start date or period is required.")
+        return data
 
     def save(self):
         event = super(EventForm, self).save(commit=False)
@@ -121,4 +123,6 @@ class EventForm(forms.ModelForm):
         event.save()
         return event
 
-
+    class Meta:
+        model = Event
+        fields = ['title', 'start_date', 'end_date', 'period', 'description']
