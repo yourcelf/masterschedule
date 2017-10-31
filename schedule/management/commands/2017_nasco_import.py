@@ -75,10 +75,16 @@ class Command(BaseCommand):
                 name=course['Room']
             )
 
-            event, created = Event.objects.get_or_create(
-                conference=conference,
-                title=course['Session Title'],
-            )
+            try:
+                event = Event.objects.get(
+                    conference=conference,
+                    title=course['Session Title'],
+                )
+            except Event.DoesNotExist:
+                event = Event(
+                    conference=conference,
+                    title=course['Session Title'],
+                )
             event.period = period
             event.venue = venue
             event.save()
