@@ -12,7 +12,7 @@ conference_slug = "eJBuaodNWrof3QuOJkHCym_gLwWVC0mGQRMZbFN9jFg="
 
 def parse_date(datestr, timestr):
     naive = datetime.datetime.strptime(
-            datestr + " " + timestr, "%m/%d/%y %I:%M:%S %p"
+            datestr + " " + timestr, "%m/%d/%y %I:%M %p"
     )
     return tz.localize(naive)
 
